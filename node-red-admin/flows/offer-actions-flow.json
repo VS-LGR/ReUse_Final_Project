@@ -1,0 +1,183 @@
+[
+    {
+        "id": "offer-status-endpoint",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Change Offer Status",
+        "url": "/api/offer/status",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 900,
+        "wires": [
+            [
+                "offer-status-processor"
+            ]
+        ]
+    },
+    {
+        "id": "offer-status-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Offer Status Change",
+        "func": "const offerId = msg.payload.offerId;\nconst action = msg.payload.action; // 'activate', 'deactivate', 'approve', 'reject'\n\nif (!offerId || !action) {\n    msg.statusCode = 400;\n    msg.payload = { success: false, error: 'ID da oferta e ação são obrigatórios' };\n    return msg;\n}\n\n// Preparar dados para a API do ReUse\nmsg.url = `http://localhost:3000/api/offers/${offerId}`;\nmsg.method = 'PATCH';\nmsg.headers = {\n    'Content-Type': 'application/json'\n};\n\n// Mapear ações para campos da API\nlet updateData = {};\nswitch(action) {\n    case 'activate':\n        updateData = { isActive: true, status: 'approved' };\n        break;\n    case 'deactivate':\n        updateData = { isActive: false };\n        break;\n    case 'approve':\n        updateData = { status: 'approved', isActive: true };\n        break;\n    case 'reject':\n        updateData = { status: 'rejected', isActive: false };\n        break;\n    default:\n        msg.statusCode = 400;\n        msg.payload = { success: false, error: 'Ação inválida' };\n        return msg;\n}\n\nmsg.payload = updateData;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 900,
+        "wires": [
+            [
+                "http-request-offer-action"
+            ]
+        ]
+    },
+    {
+        "id": "http-request-offer-action",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Update Offer in ReUse API",
+        "method": "PATCH",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "x": 640,
+        "y": 900,
+        "wires": [
+            [
+                "offer-action-response"
+            ]
+        ]
+    },
+    {
+        "id": "offer-action-response",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Format Offer Action Response",
+        "func": "if (msg.statusCode >= 200 && msg.statusCode < 300) {\n    msg.payload = {\n        success: true,\n        message: 'Oferta atualizada com sucesso',\n        data: msg.payload\n    };\n} else {\n    msg.payload = {\n        success: false,\n        error: 'Erro ao atualizar oferta: ' + (msg.payload.message || 'Erro desconhecido')\n    };\n}\n\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 900,
+        "wires": [
+            [
+                "offer-action-http-response"
+            ]
+        ]
+    },
+    {
+        "id": "offer-action-http-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Offer Action Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1160,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "offer-delete-endpoint",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Delete Offer",
+        "url": "/api/offer/delete",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 1000,
+        "wires": [
+            [
+                "offer-delete-processor"
+            ]
+        ]
+    },
+    {
+        "id": "offer-delete-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Offer Delete",
+        "func": "const offerId = msg.payload.offerId;\n\nif (!offerId) {\n    msg.statusCode = 400;\n    msg.payload = { success: false, error: 'ID da oferta é obrigatório' };\n    return msg;\n}\n\n// Preparar dados para a API do ReUse\nmsg.url = `http://localhost:3000/api/offers/${offerId}`;\nmsg.method = 'DELETE';\nmsg.headers = {\n    'Content-Type': 'application/json'\n};\n\n// Para DELETE, não precisamos de payload\nmsg.payload = {};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 1000,
+        "wires": [
+            [
+                "http-request-offer-delete"
+            ]
+        ]
+    },
+    {
+        "id": "http-request-offer-delete",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Delete Offer from ReUse API",
+        "method": "DELETE",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "x": 640,
+        "y": 1000,
+        "wires": [
+            [
+                "offer-delete-response"
+            ]
+        ]
+    },
+    {
+        "id": "offer-delete-response",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Format Offer Delete Response",
+        "func": "if (msg.statusCode >= 200 && msg.statusCode < 300) {\n    msg.payload = {\n        success: true,\n        message: 'Oferta removida com sucesso'\n    };\n} else {\n    msg.payload = {\n        success: false,\n        error: 'Erro ao remover oferta: ' + (msg.payload.message || 'Erro desconhecido')\n    };\n}\n\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 1000,
+        "wires": [
+            [
+                "offer-delete-http-response"
+            ]
+        ]
+    },
+    {
+        "id": "offer-delete-http-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Offer Delete Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1160,
+        "y": 1000,
+        "wires": []
+    }
+]
+
+
+

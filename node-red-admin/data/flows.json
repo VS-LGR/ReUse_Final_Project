@@ -1,0 +1,708 @@
+[
+    {
+        "id": "simple-admin-flow",
+        "type": "tab",
+        "label": "ReUse Admin Panel",
+        "disabled": false,
+        "info": "Painel administrativo completo do ReUse",
+        "env": []
+    },
+    {
+        "id": "admin-trigger",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Admin Login",
+        "url": "/admin",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "admin-processor"
+            ]
+        ]
+    },
+    {
+        "id": "admin-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Admin HTML",
+        "func": "// Código COM LOGO DO REUSE para o nó \"Admin HTML\" (Login) - substitua todo o conteúdo do nó por este:\n\nmsg.payload = `<!DOCTYPE html>\n<html>\n<head>\n    <title>ReUse Admin - Login</title>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { \n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; \n            background: linear-gradient(135deg, #27ae60, #2ecc71);\n            min-height: 100vh;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n        }\n        .login-container {\n            background: white;\n            padding: 40px;\n            border-radius: 16px;\n            box-shadow: 0 10px 30px rgba(0,0,0,0.2);\n            width: 100%;\n            max-width: 400px;\n            text-align: center;\n        }\n        .logo-section {\n            margin-bottom: 30px;\n        }\n        .logo-icon { \n            width: 80px; \n            height: 80px; \n            border-radius: 16px; \n            display: flex; \n            align-items: center; \n            justify-content: center; \n            background: white; \n            box-shadow: 0 4px 12px rgba(0,0,0,0.1);\n            margin: 0 auto 20px;\n        }\n        .logo-icon img { \n            width: 100%; \n            height: 100%; \n            object-fit: contain; \n            border-radius: 16px; \n        }\n        .login-title {\n            font-size: 28px;\n            font-weight: bold;\n            color: #2c3e50;\n            margin-bottom: 10px;\n        }\n        .login-subtitle {\n            color: #666;\n            font-size: 16px;\n            margin-bottom: 30px;\n        }\n        .form-group {\n            margin-bottom: 20px;\n            text-align: left;\n        }\n        .form-label {\n            display: block;\n            margin-bottom: 8px;\n            color: #2c3e50;\n            font-weight: 500;\n        }\n        .form-input {\n            width: 100%;\n            padding: 12px 16px;\n            border: 2px solid #e0e0e0;\n            border-radius: 8px;\n            font-size: 16px;\n            transition: border-color 0.3s;\n            box-sizing: border-box;\n        }\n        .form-input:focus {\n            outline: none;\n            border-color: #27ae60;\n        }\n        .login-btn {\n            width: 100%;\n            padding: 12px;\n            background: linear-gradient(135deg, #27ae60, #2ecc71);\n            color: white;\n            border: none;\n            border-radius: 8px;\n            font-size: 16px;\n            font-weight: 600;\n            cursor: pointer;\n            transition: transform 0.2s;\n            margin-top: 10px;\n        }\n        .login-btn:hover {\n            transform: translateY(-2px);\n        }\n        .login-btn:disabled {\n            opacity: 0.6;\n            cursor: not-allowed;\n            transform: none;\n        }\n        .error-message {\n            background: #fee;\n            color: #c33;\n            padding: 12px;\n            border-radius: 8px;\n            margin-top: 15px;\n            border: 1px solid #fcc;\n            display: none;\n        }\n        .success-message {\n            background: #e8f5e8;\n            color: #27ae60;\n            padding: 12px;\n            border-radius: 8px;\n            margin-top: 15px;\n            border: 1px solid #27ae60;\n            display: none;\n        }\n        .loading {\n            display: none;\n            color: #666;\n            margin-top: 15px;\n        }\n        .footer {\n            margin-top: 30px;\n            color: #666;\n            font-size: 14px;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"login-container\">\n        <div class=\"logo-section\">\n            <div class=\"logo-icon\">\n                <img src=\"https://i.imgur.com/OD3laQP.png\" alt=\"ReUse Logo\">\n            </div>\n            <h1 class=\"login-title\">ReUse Admin</h1>\n            <p class=\"login-subtitle\">Painel Administrativo</p>\n        </div>\n        \n        <form id=\"loginForm\">\n            <div class=\"form-group\">\n                <label class=\"form-label\" for=\"username\">Usuário</label>\n                <input type=\"text\" id=\"username\" class=\"form-input\" placeholder=\"Digite seu usuário\" required>\n            </div>\n            \n            <div class=\"form-group\">\n                <label class=\"form-label\" for=\"password\">Senha</label>\n                <input type=\"password\" id=\"password\" class=\"form-input\" placeholder=\"Digite sua senha\" required>\n            </div>\n            \n            <button type=\"submit\" class=\"login-btn\" id=\"loginBtn\">\n                Entrar\n            </button>\n            \n            <div class=\"loading\" id=\"loading\">\n                Verificando credenciais...\n            </div>\n            \n            <div class=\"error-message\" id=\"errorMessage\">\n                Usuário ou senha incorretos\n            </div>\n            \n            <div class=\"success-message\" id=\"successMessage\">\n                Login realizado com sucesso!\n            </div>\n        </form>\n        \n        <div class=\"footer\">\n            <p>© 2025 ReUse - Sistema de Reutilização</p>\n        </div>\n    </div>\n\n    <script>\n        document.getElementById('loginForm').addEventListener('submit', function(e) {\n            e.preventDefault();\n            \n            const username = document.getElementById('username').value;\n            const password = document.getElementById('password').value;\n            const loginBtn = document.getElementById('loginBtn');\n            const loading = document.getElementById('loading');\n            const errorMessage = document.getElementById('errorMessage');\n            const successMessage = document.getElementById('successMessage');\n            \n            // Limpar mensagens anteriores\n            errorMessage.style.display = 'none';\n            successMessage.style.display = 'none';\n            \n            // Mostrar loading\n            loginBtn.disabled = true;\n            loading.style.display = 'block';\n            \n            // Simular verificação de credenciais\n            setTimeout(() => {\n                // Credenciais de exemplo (em produção, verificar com servidor)\n                if (username === 'admin' && password === 'admin123') {\n                    // Login bem-sucedido\n                    successMessage.style.display = 'block';\n                    \n                    // Salvar token de autenticação\n                    localStorage.setItem('adminToken', 'admin-token-' + Date.now());\n                    \n                    // Redirecionar para dashboard após 1 segundo\n                    setTimeout(() => {\n                        window.location.href = '/admin/dashboard';\n                    }, 1000);\n                } else {\n                    // Login falhou\n                    errorMessage.style.display = 'block';\n                    loginBtn.disabled = false;\n                    loading.style.display = 'none';\n                }\n            }, 1500);\n        });\n\n        // Verificar se já está logado\n        if (localStorage.getItem('adminToken')) {\n            window.location.href = '/admin/dashboard';\n        }\n    </script>\n</body>\n</html>`;\n\nmsg.headers = {\n    'Content-Type': 'text/html; charset=utf-8'\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 100,
+        "wires": [
+            [
+                "admin-response"
+            ]
+        ]
+    },
+    {
+        "id": "admin-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Admin Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 560,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "dashboard-trigger",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Dashboard",
+        "url": "/admin/dashboard",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 200,
+        "wires": [
+            [
+                "dashboard-processor"
+            ]
+        ]
+    },
+    {
+        "id": "dashboard-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Dashboard HTML",
+        "func": "// Código COM GRÁFICO DE ATIVIDADE para o nó \"Dashboard HTML\" - substitua todo o conteúdo do nó por este:\n\nmsg.payload = `<!DOCTYPE html>\n<html>\n<head>\n    <title>ReUse Admin - Dashboard</title>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f8f9fa; }\n        .header { background: #f8f8f8; padding: 20px 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }\n        .logo { color: #27ae60; font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 15px; }\n        .logo-icon { width: 50px; height: 50px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }\n        .logo-icon img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }\n        .user-info { display: flex; align-items: center; gap: 15px; }\n        .nav { background: #2c3e50; padding: 0; display: flex; }\n        .nav a { color: white; text-decoration: none; padding: 15px 30px; transition: all 0.3s; }\n        .nav a:hover, .nav a.active { background: #34495e; }\n        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }\n        .page-title { font-size: 28px; color: #2c3e50; margin-bottom: 30px; text-align: center; }\n        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }\n        .metric-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 20px; transition: transform 0.3s; }\n        .metric-card:hover { transform: translateY(-2px); }\n        .metric-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }\n        .metric-icon.users { background: linear-gradient(135deg, #3498db, #2980b9); }\n        .metric-icon.offers { background: linear-gradient(135deg, #e74c3c, #c0392b); }\n        .metric-icon.trades { background: linear-gradient(135deg, #f39c12, #e67e22); }\n        .metric-icon.reports { background: linear-gradient(135deg, #9b59b6, #8e44ad); }\n        .metric-content h3 { font-size: 32px; font-weight: bold; margin-bottom: 5px; }\n        .metric-content p { color: #666; font-size: 14px; }\n        .chart-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 30px; }\n        .chart-title { font-size: 20px; font-weight: 600; color: #2c3e50; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }\n        .chart-wrapper { position: relative; height: 400px; }\n        .recent-activities { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }\n        .activity-title { font-size: 20px; font-weight: 600; color: #2c3e50; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }\n        .activity-item { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid #eee; }\n        .activity-item:last-child { border-bottom: none; }\n        .activity-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }\n        .activity-icon.user { background: #e3f2fd; color: #1976d2; }\n        .activity-icon.offer { background: #fce4ec; color: #c2185b; }\n        .activity-icon.trade { background: #fff3e0; color: #f57c00; }\n        .activity-content { flex: 1; }\n        .activity-text { font-weight: 500; color: #2c3e50; margin-bottom: 3px; }\n        .activity-time { font-size: 12px; color: #666; }\n        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s; }\n        .btn-danger { background: #e74c3c; color: white; }\n        .btn-danger:hover { background: #c0392b; }\n        .loading { text-align: center; padding: 40px; color: #666; }\n        .error { background: #fee; border: 1px solid #fcc; color: #c33; padding: 12px; border-radius: 8px; margin: 20px 0; }\n        .chart-controls { display: flex; gap: 10px; margin-bottom: 20px; }\n        .chart-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.3s; }\n        .chart-btn.active { background: #27ae60; color: white; border-color: #27ae60; }\n        .chart-btn:hover { background: #f0f0f0; }\n        .chart-btn.active:hover { background: #229954; }\n        .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }\n        .stat-item { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }\n        .stat-value { font-size: 24px; font-weight: bold; color: #27ae60; }\n        .stat-label { font-size: 12px; color: #666; margin-top: 5px; }\n    </style>\n</head>\n<body>\n    <div class=\"header\">\n        <div class=\"logo\">\n            <div class=\"logo-icon\">\n                <img src=\"https://i.imgur.com/OD3laQP.png\" alt=\"ReUse Logo\">\n            </div>\n            <span>ReUse!</span>\n        </div>\n        <div class=\"user-info\">\n            <span>Bem-vindo, Admin</span>\n            <button onclick=\"logout()\" class=\"btn btn-danger\">Sair</button>\n        </div>\n    </div>\n    <div class=\"nav\">\n        <a href=\"/admin/dashboard\" class=\"active\">📊 Dashboard</a>\n        <a href=\"/admin/users\">👥 Usuários</a>\n        <a href=\"/admin/offers\">📦 Ofertas</a>\n    </div>\n    <div class=\"container\">\n        <h1 class=\"page-title\">Dashboard</h1>\n        \n        <div class=\"metrics-grid\">\n            <div class=\"metric-card\">\n                <div class=\"metric-icon users\">👥</div>\n                <div class=\"metric-content\">\n                    <h3 id=\"totalUsers\">-</h3>\n                    <p>Total de Usuários</p>\n                </div>\n            </div>\n            <div class=\"metric-card\">\n                <div class=\"metric-icon offers\">📦</div>\n                <div class=\"metric-content\">\n                    <h3 id=\"totalOffers\">-</h3>\n                    <p>Total de Ofertas</p>\n                </div>\n            </div>\n            <div class=\"metric-card\">\n                <div class=\"metric-icon trades\">🤝</div>\n                <div class=\"metric-content\">\n                    <h3 id=\"totalTrades\">-</h3>\n                    <p>Trocas Realizadas</p>\n                </div>\n            </div>\n            <div class=\"metric-card\">\n                <div class=\"metric-icon reports\">⚠️</div>\n                <div class=\"metric-content\">\n                    <h3 id=\"totalReports\">-</h3>\n                    <p>Denúncias</p>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"chart-container\">\n            <div class=\"chart-title\">\n                📈 Atividade Recente\n            </div>\n            <div class=\"chart-controls\">\n                <button class=\"chart-btn active\" onclick=\"changeChartPeriod('7d')\">7 dias</button>\n                <button class=\"chart-btn\" onclick=\"changeChartPeriod('30d')\">30 dias</button>\n                <button class=\"chart-btn\" onclick=\"changeChartPeriod('90d')\">90 dias</button>\n            </div>\n            <div class=\"chart-wrapper\">\n                <canvas id=\"activityChart\"></canvas>\n            </div>\n            <div class=\"stats-summary\">\n                <div class=\"stat-item\">\n                    <div class=\"stat-value\" id=\"newUsersThisWeek\">-</div>\n                    <div class=\"stat-label\">Novos usuários esta semana</div>\n                </div>\n                <div class=\"stat-item\">\n                    <div class=\"stat-value\" id=\"newOffersThisWeek\">-</div>\n                    <div class=\"stat-label\">Novas ofertas esta semana</div>\n                </div>\n                <div class=\"stat-item\">\n                    <div class=\"stat-value\" id=\"growthRate\">-</div>\n                    <div class=\"stat-label\">Taxa de crescimento</div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"recent-activities\">\n            <div class=\"activity-title\">\n                🔔 Atividades Recentes\n            </div>\n            <div id=\"recentActivitiesList\">\n                <div class=\"loading\">Carregando atividades...</div>\n            </div>\n        </div>\n    </div>\n\n    <script>\n        let activityChart = null;\n        let currentPeriod = '7d';\n        let usersData = [];\n        let offersData = [];\n\n        async function loadDashboardData() {\n            try {\n                console.log('Carregando dados do dashboard...');\n                \n                // Carregar usuários e ofertas em paralelo\n                const [usersResponse, offersResponse] = await Promise.all([\n                    fetch('/api/users-proxy'),\n                    fetch('/api/offers-proxy')\n                ]);\n                \n                if (usersResponse.ok && offersResponse.ok) {\n                    usersData = await usersResponse.json();\n                    offersData = await offersResponse.json();\n                    \n                    console.log('Dados carregados:', { users: usersData.length, offers: offersData.length });\n                    \n                    updateMetrics();\n                    updateChart();\n                    updateRecentActivities();\n                } else {\n                    throw new Error('Erro ao carregar dados');\n                }\n            } catch (error) {\n                console.error('Erro ao carregar dados do dashboard:', error);\n                // Usar dados simulados em caso de erro\n                loadSimulatedData();\n            }\n        }\n\n        function loadSimulatedData() {\n            console.log('Carregando dados simulados...');\n            \n            // Gerar dados simulados para os últimos 30 dias\n            const now = new Date();\n            usersData = [];\n            offersData = [];\n            \n            for (let i = 29; i >= 0; i--) {\n                const date = new Date(now);\n                date.setDate(date.getDate() - i);\n                \n                // Simular usuários (mais nos fins de semana)\n                const dayOfWeek = date.getDay();\n                const baseUsers = dayOfWeek === 0 || dayOfWeek === 6 ? 3 : 1;\n                const userCount = Math.floor(Math.random() * baseUsers) + (dayOfWeek === 0 || dayOfWeek === 6 ? 1 : 0);\n                \n                for (let j = 0; j < userCount; j++) {\n                    usersData.push({\n                        id: 'sim_' + i + '_' + j,\n                        name: 'Usuário Simulado ' + (i * 10 + j),\n                        email: 'user' + (i * 10 + j) + '@example.com',\n                        createdAt: date.toISOString(),\n                        isBlocked: false\n                    });\n                }\n                \n                // Simular ofertas (menos nos fins de semana)\n                const offerCount = Math.floor(Math.random() * (dayOfWeek === 0 || dayOfWeek === 6 ? 2 : 4));\n                for (let j = 0; j < offerCount; j++) {\n                    offersData.push({\n                        id: 'offer_' + i + '_' + j,\n                        title: 'Oferta Simulada ' + (i * 10 + j),\n                        description: 'Descrição da oferta simulada',\n                        createdAt: date.toISOString(),\n                        status: Math.random() > 0.3 ? 'approved' : 'pending',\n                        isActive: true\n                    });\n                }\n            }\n            \n            updateMetrics();\n            updateChart();\n            updateRecentActivities();\n        }\n\n        function updateMetrics() {\n            const totalUsers = usersData.length;\n            const totalOffers = offersData.length;\n            const activeUsers = usersData.filter(user => !user.isBlocked).length;\n            const activeOffers = offersData.filter(offer => offer.isActive).length;\n            \n            document.getElementById('totalUsers').textContent = totalUsers;\n            document.getElementById('totalOffers').textContent = totalOffers;\n            document.getElementById('totalTrades').textContent = '0'; // Implementar quando houver sistema de trocas\n            document.getElementById('totalReports').textContent = '0'; // Implementar quando houver sistema de denúncias\n        }\n\n        function updateChart() {\n            const ctx = document.getElementById('activityChart').getContext('2d');\n            \n            if (activityChart) {\n                activityChart.destroy();\n            }\n            \n            const chartData = generateChartData();\n            \n            activityChart = new Chart(ctx, {\n                type: 'line',\n                data: {\n                    labels: chartData.labels,\n                    datasets: [{\n                        label: 'Novos Usuários',\n                        data: chartData.users,\n                        borderColor: '#27ae60',\n                        backgroundColor: 'rgba(39, 174, 96, 0.1)',\n                        borderWidth: 3,\n                        fill: true,\n                        tension: 0.4,\n                        pointBackgroundColor: '#27ae60',\n                        pointBorderColor: '#fff',\n                        pointBorderWidth: 2,\n                        pointRadius: 6,\n                        pointHoverRadius: 8\n                    }, {\n                        label: 'Novas Ofertas',\n                        data: chartData.offers,\n                        borderColor: '#e74c3c',\n                        backgroundColor: 'rgba(231, 76, 60, 0.1)',\n                        borderWidth: 3,\n                        fill: true,\n                        tension: 0.4,\n                        pointBackgroundColor: '#e74c3c',\n                        pointBorderColor: '#fff',\n                        pointBorderWidth: 2,\n                        pointRadius: 6,\n                        pointHoverRadius: 8\n                    }]\n                },\n                options: {\n                    responsive: true,\n                    maintainAspectRatio: false,\n                    plugins: {\n                        legend: {\n                            position: 'top',\n                            labels: {\n                                usePointStyle: true,\n                                padding: 20,\n                                font: {\n                                    size: 14,\n                                    weight: '500'\n                                }\n                            }\n                        },\n                        tooltip: {\n                            backgroundColor: 'rgba(0,0,0,0.8)',\n                            titleColor: '#fff',\n                            bodyColor: '#fff',\n                            borderColor: '#27ae60',\n                            borderWidth: 1,\n                            cornerRadius: 8,\n                            displayColors: true,\n                            intersect: false,\n                            mode: 'index'\n                        }\n                    },\n                    scales: {\n                        x: {\n                            grid: {\n                                color: 'rgba(0,0,0,0.05)',\n                                drawBorder: false\n                            },\n                            ticks: {\n                                color: '#666',\n                                font: {\n                                    size: 12\n                                }\n                            }\n                        },\n                        y: {\n                            beginAtZero: true,\n                            grid: {\n                                color: 'rgba(0,0,0,0.05)',\n                                drawBorder: false\n                            },\n                            ticks: {\n                                color: '#666',\n                                font: {\n                                    size: 12\n                                },\n                                stepSize: 1\n                            }\n                        }\n                    },\n                    interaction: {\n                        intersect: false,\n                        mode: 'index'\n                    }\n                }\n            });\n            \n            updateChartStats(chartData);\n        }\n\n        function generateChartData() {\n            const days = currentPeriod === '7d' ? 7 : currentPeriod === '30d' ? 30 : 90;\n            const labels = [];\n            const usersDataByDay = {};\n            const offersDataByDay = {};\n            \n            // Inicializar arrays com zeros\n            for (let i = days - 1; i >= 0; i--) {\n                const date = new Date();\n                date.setDate(date.getDate() - i);\n                const dateStr = date.toISOString().split('T')[0];\n                labels.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));\n                usersDataByDay[dateStr] = 0;\n                offersDataByDay[dateStr] = 0;\n            }\n            \n            // Contar usuários por dia\n            usersData.forEach(user => {\n                const userDate = new Date(user.createdAt).toISOString().split('T')[0];\n                if (usersDataByDay[userDate] !== undefined) {\n                    usersDataByDay[userDate]++;\n                }\n            });\n            \n            // Contar ofertas por dia\n            offersData.forEach(offer => {\n                const offerDate = new Date(offer.createdAt).toISOString().split('T')[0];\n                if (offersDataByDay[offerDate] !== undefined) {\n                    offersDataByDay[offerDate]++;\n                }\n            });\n            \n            return {\n                labels: labels,\n                users: Object.values(usersDataByDay),\n                offers: Object.values(offersDataByDay)\n            };\n        }\n\n        function updateChartStats(chartData) {\n            const totalUsers = chartData.users.reduce((a, b) => a + b, 0);\n            const totalOffers = chartData.offers.reduce((a, b) => a + b, 0);\n            const previousWeekUsers = chartData.users.slice(0, Math.floor(chartData.users.length / 2)).reduce((a, b) => a + b, 0);\n            const currentWeekUsers = chartData.users.slice(Math.floor(chartData.users.length / 2)).reduce((a, b) => a + b, 0);\n            const growthRate = previousWeekUsers > 0 ? ((currentWeekUsers - previousWeekUsers) / previousWeekUsers * 100).toFixed(1) : 0;\n            \n            document.getElementById('newUsersThisWeek').textContent = totalUsers;\n            document.getElementById('newOffersThisWeek').textContent = totalOffers;\n            document.getElementById('growthRate').textContent = growthRate + '%';\n        }\n\n        function changeChartPeriod(period) {\n            currentPeriod = period;\n            \n            // Atualizar botões\n            document.querySelectorAll('.chart-btn').forEach(btn => {\n                btn.classList.remove('active');\n            });\n            event.target.classList.add('active');\n            \n            updateChart();\n        }\n\n        function updateRecentActivities() {\n            const activities = [];\n            \n            // Adicionar atividades de usuários\n            usersData.slice(-10).forEach(user => {\n                activities.push({\n                    type: 'user',\n                    text: 'Novo usuário registrado',\n                    detail: user.name + ' se cadastrou no sistema',\n                    time: new Date(user.createdAt).toLocaleString('pt-BR'),\n                    icon: '👤'\n                });\n            });\n            \n            // Adicionar atividades de ofertas\n            offersData.slice(-10).forEach(offer => {\n                activities.push({\n                    type: 'offer',\n                    text: 'Nova oferta criada',\n                    detail: offer.title + ' foi adicionada',\n                    time: new Date(offer.createdAt).toLocaleString('pt-BR'),\n                    icon: '📦'\n                });\n            });\n            \n            // Ordenar por data (mais recente primeiro)\n            activities.sort((a, b) => new Date(b.time) - new Date(a.time));\n            \n            // Mostrar apenas as 10 mais recentes\n            const recentActivities = activities.slice(0, 10);\n            \n            const activitiesList = document.getElementById('recentActivitiesList');\n            if (recentActivities.length === 0) {\n                activitiesList.innerHTML = '<div class=\"loading\">Nenhuma atividade recente</div>';\n                return;\n            }\n            \n            activitiesList.innerHTML = recentActivities.map(function(activity) {\n                return '<div class=\"activity-item\">' +\n                    '<div class=\"activity-icon ' + activity.type + '\">' + activity.icon + '</div>' +\n                    '<div class=\"activity-content\">' +\n                        '<div class=\"activity-text\">' + activity.text + '</div>' +\n                        '<div class=\"activity-detail\">' + activity.detail + '</div>' +\n                        '<div class=\"activity-time\">' + activity.time + '</div>' +\n                    '</div>' +\n                '</div>';\n            }).join('');\n        }\n\n        function logout() {\n            localStorage.removeItem('adminToken');\n            window.location.href = '/admin';\n        }\n\n        if (!localStorage.getItem('adminToken')) {\n            window.location.href = '/admin';\n        }\n\n        // Carregar dados automaticamente\n        loadDashboardData();\n    </script>\n</body>\n</html>`;\n\nmsg.headers = {\n    'Content-Type': 'text/html; charset=utf-8'\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 200,
+        "wires": [
+            [
+                "dashboard-response"
+            ]
+        ]
+    },
+    {
+        "id": "dashboard-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Dashboard Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 580,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "users-trigger",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Users Management",
+        "url": "/admin/users",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 300,
+        "wires": [
+            [
+                "users-processor"
+            ]
+        ]
+    },
+    {
+        "id": "users-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Users HTML",
+        "func": "msg.payload = `<!DOCTYPE html>\n<html>\n<head>\n    <title>ReUse Admin - Gerenciar Usuários</title>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;\n            background: #f8f9fa;\n        }\n\n        .header {\n            background: #f8f8f8;\n            padding: 20px 40px;\n            box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n        }\n\n        .logo {\n            color: #27ae60;\n            font-size: 24px;\n            font-weight: bold;\n            display: flex;\n            align-items: center;\n            gap: 15px;\n        }\n\n        .logo-icon {\n            width: 50px;\n            height: 50px;\n            border-radius: 8px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            background: white;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n        }\n\n        .logo-icon img {\n            width: 100%;\n            height: 100%;\n            object-fit: contain;\n            border-radius: 8px;\n        }\n\n        .user-info {\n            display: flex;\n            align-items: center;\n            gap: 1rem;\n        }\n\n        .btn {\n            padding: 0.5rem 1rem;\n            border: none;\n            border-radius: 6px;\n            cursor: pointer;\n            font-weight: 500;\n            transition: all 0.3s ease;\n            text-decoration: none;\n            display: inline-flex;\n            align-items: center;\n            gap: 0.5rem;\n        }\n\n        .btn-danger {\n            background: #e74c3c;\n            color: white;\n        }\n\n        .btn-danger:hover {\n            background: #c0392b;\n            transform: translateY(-2px);\n        }\n\n        .nav {\n            background: #2c3e50;\n            padding: 0;\n            display: flex;\n        }\n\n        .nav a {\n            color: white;\n            text-decoration: none;\n            padding: 15px 30px;\n            transition: all 0.3s;\n        }\n\n        .nav a:hover, .nav a.active {\n            background: #34495e;\n        }\n\n        .container {\n            max-width: 1200px;\n            margin: 0 auto;\n            padding: 30px;\n        }\n\n        .page-title {\n            font-size: 28px;\n            color: #2c3e50;\n            margin-bottom: 30px;\n        }\n\n        .search-container {\n            background: white;\n            padding: 20px;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            margin-bottom: 30px;\n            display: flex;\n            align-items: center;\n            gap: 15px;\n        }\n\n        .search-icon {\n            width: 20px;\n            height: 20px;\n            opacity: 0.5;\n        }\n\n        .search-input {\n            flex: 1;\n            border: none;\n            outline: none;\n            font-size: 16px;\n            color: #333;\n        }\n\n        .search-input::placeholder {\n            color: #999;\n        }\n\n        .users-list {\n            background: white;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            overflow: hidden;\n        }\n\n        .user-item {\n            display: flex;\n            align-items: center;\n            padding: 20px;\n            border-bottom: 1px solid #eee;\n            transition: all 0.3s;\n        }\n\n        .user-item:hover {\n            background: #f8f9fa;\n        }\n\n        .user-item:last-child {\n            border-bottom: none;\n        }\n\n        .user-avatar {\n            width: 60px;\n            height: 60px;\n            border-radius: 50%;\n            object-fit: cover;\n            margin-right: 20px;\n        }\n\n        .user-info {\n            flex: 1;\n        }\n\n        .user-name {\n            font-size: 18px;\n            font-weight: 600;\n            color: #2c3e50;\n            margin-bottom: 5px;\n        }\n\n        .user-status {\n            font-size: 14px;\n            color: #666;\n        }\n\n        .user-status.active {\n            color: #27ae60;\n        }\n\n        .user-status.blocked {\n            color: #e74c3c;\n        }\n\n        .user-actions {\n            display: flex;\n            gap: 20px;\n            align-items: center;\n        }\n\n        .action-btn {\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            gap: 5px;\n            cursor: pointer;\n            padding: 10px;\n            border-radius: 6px;\n            transition: all 0.3s;\n        }\n\n        .action-btn:hover {\n            background: #f0f0f0;\n        }\n\n        .action-icon {\n            width: 24px;\n            height: 24px;\n        }\n\n        .action-text {\n            font-size: 12px;\n            color: #666;\n        }\n\n        .loading {\n            text-align: center;\n            padding: 3rem;\n            color: #7f8c8d;\n            font-size: 1.1rem;\n        }\n\n        .error {\n            text-align: center;\n            padding: 3rem;\n            color: #e74c3c;\n            font-size: 1.1rem;\n        }\n\n        /* Modal personalizado com dropShadow e tons de verde */\n        .modal { \n            display: none; \n            position: fixed; \n            z-index: 1000; \n            left: 0; \n            top: 0; \n            width: 100%; \n            height: 100%; \n            background-color: rgba(0,0,0,0.6);\n            backdrop-filter: blur(4px);\n        }\n        .modal-content { \n            background: white; \n            margin: 5% auto; \n            padding: 0; \n            border-radius: 20px; \n            width: 90%; \n            max-width: 500px; \n            box-shadow: \n                0 25px 50px rgba(39, 174, 96, 0.15),\n                0 15px 35px rgba(39, 174, 96, 0.1),\n                0 5px 15px rgba(0,0,0,0.1);\n            animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);\n            border: 1px solid rgba(39, 174, 96, 0.1);\n            position: relative;\n            top: 50%;\n            transform: translateY(-50%);\n        }\n        @keyframes modalSlideIn {\n            from { \n                transform: translateY(-50%) scale(0.9); \n                opacity: 0; \n            }\n            to { \n                transform: translateY(-50%) scale(1); \n                opacity: 1; \n            }\n        }\n        .modal-header { \n            background: linear-gradient(135deg, #27ae60, #2ecc71);\n            color: white; \n            padding: 25px 30px; \n            border-radius: 20px 20px 0 0;\n            display: flex; \n            justify-content: space-between; \n            align-items: center;\n            position: relative;\n            overflow: hidden;\n        }\n        .modal-header::before {\n            content: '';\n            position: absolute;\n            top: 0;\n            left: 0;\n            right: 0;\n            bottom: 0;\n            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);\n            animation: shimmer 2s infinite;\n        }\n        @keyframes shimmer {\n            0% { transform: translateX(-100%); }\n            100% { transform: translateX(100%); }\n        }\n        .modal-title { \n            font-size: 22px; \n            font-weight: 700; \n            margin: 0;\n            display: flex;\n            align-items: center;\n            gap: 12px;\n            position: relative;\n            z-index: 1;\n        }\n        .modal-icon {\n            width: 28px;\n            height: 28px;\n            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));\n        }\n        .close { \n            color: white; \n            font-size: 32px; \n            font-weight: bold; \n            cursor: pointer; \n            opacity: 0.8;\n            transition: all 0.3s;\n            position: relative;\n            z-index: 1;\n            width: 40px;\n            height: 40px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            border-radius: 50%;\n        }\n        .close:hover { \n            opacity: 1; \n            background: rgba(255,255,255,0.2);\n            transform: rotate(90deg);\n        }\n        .modal-body { \n            padding: 35px 30px; \n            max-height: 500px;\n            overflow-y: auto;\n        }\n        .modal-actions { \n            display: flex; \n            gap: 15px; \n            justify-content: flex-end; \n            padding: 25px 30px;\n            background: linear-gradient(135deg, #f8f9fa, #e9ecef);\n            border-radius: 0 0 20px 20px;\n            border-top: 1px solid rgba(39, 174, 96, 0.1);\n        }\n        \n        /* Formulário de trocar senha */\n        .form-group {\n            margin-bottom: 20px;\n        }\n        .form-label {\n            display: block;\n            margin-bottom: 8px;\n            color: #2c3e50;\n            font-weight: 600;\n            font-size: 14px;\n        }\n        .form-input {\n            width: 100%;\n            padding: 12px 16px;\n            border: 2px solid #e0e0e0;\n            border-radius: 10px;\n            font-size: 16px;\n            transition: all 0.3s;\n            box-sizing: border-box;\n        }\n        .form-input:focus {\n            outline: none;\n            border-color: #27ae60;\n            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);\n        }\n        \n        /* Toast notifications */\n        .toast {\n            position: fixed;\n            top: 20px;\n            right: 20px;\n            z-index: 9999;\n            padding: 16px 24px;\n            border-radius: 12px;\n            box-shadow: \n                0 10px 25px rgba(39, 174, 96, 0.15),\n                0 5px 15px rgba(0,0,0,0.1);\n            color: white;\n            font-weight: 500;\n            animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);\n            backdrop-filter: blur(10px);\n        }\n        .toast.success { \n            background: linear-gradient(135deg, #27ae60, #2ecc71);\n            border: 1px solid rgba(39, 174, 96, 0.3);\n        }\n        .toast.error { \n            background: linear-gradient(135deg, #e74c3c, #c0392b);\n            border: 1px solid rgba(231, 76, 60, 0.3);\n        }\n        .toast.warning { \n            background: linear-gradient(135deg, #f39c12, #e67e22);\n            border: 1px solid rgba(243, 156, 18, 0.3);\n        }\n        @keyframes toastSlideIn {\n            from { \n                transform: translateX(100%) scale(0.8); \n                opacity: 0; \n            }\n            to { \n                transform: translateX(0) scale(1); \n                opacity: 1; \n            }\n        }\n\n        .btn-primary {\n            background: #27ae60;\n            color: white;\n        }\n\n        .btn-primary:hover {\n            background: #229954;\n        }\n\n        .btn-secondary {\n            background: #95a5a6;\n            color: white;\n        }\n\n        .btn-secondary:hover {\n            background: #7f8c8d;\n        }\n\n        /* Toast Notifications */\n        .toast {\n            position: fixed;\n            top: 20px;\n            right: 20px;\n            background: #2c3e50;\n            color: white;\n            padding: 1rem 1.5rem;\n            border-radius: 8px;\n            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n            z-index: 1001;\n            animation: toastSlideIn 0.3s ease;\n        }\n\n        .toast.success {\n            background: #27ae60;\n        }\n\n        .toast.error {\n            background: #e74c3c;\n        }\n\n        @keyframes toastSlideIn {\n            from {\n                opacity: 0;\n                transform: translateX(100%);\n            }\n            to {\n                opacity: 1;\n                transform: translateX(0);\n            }\n        }\n    </style>\n</head>\n<body>\n    <div class=\"header\">\n        <div class=\"logo\">\n            <div class=\"logo-icon\">\n                <img src=\"https://i.imgur.com/OD3laQP.png\" alt=\"ReUse Logo\">\n            </div>\n            <span>ReUse!</span>\n        </div>\n        <div class=\"user-info\">\n            <span>Bem-vindo, Admin</span>\n            <button onclick=\"logout()\" class=\"btn btn-danger\">Sair</button>\n        </div>\n    </div>\n    <div class=\"nav\">\n        <a href=\"/admin/dashboard\">📊 Dashboard</a>\n        <a href=\"/admin/users\" class=\"active\">👥 Usuários</a>\n        <a href=\"/admin/offers\">📦 Ofertas</a>\n    </div>\n    <div class=\"container\">\n        <h1 class=\"page-title\">Gerenciar usuários</h1>\n        <div class=\"search-container\">\n            <img src=\"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5IDE5TDEzIDEzTTE1IDhBNyA3IDAgMSAxIDE1IDhBNyA3IDAgMSAxIDE1IDh6IiBzdHJva2U9IiM5OTk5OTkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=\" class=\"search-icon\" alt=\"Buscar\">\n            <input type=\"text\" class=\"search-input\" placeholder=\"buscar usuário\" id=\"searchInput\">\n            <button onclick=\"loadUsers()\" class=\"refresh-btn\">🔄 Atualizar</button>\n        </div>\n        <div class=\"users-list\" id=\"usersList\">\n            <div class=\"loading\">Carregando usuários da API...</div>\n        </div>\n    </div>\n\n    <!-- Modal para trocar senha -->\n    <div id=\"changePasswordModal\" class=\"modal\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h3 class=\"modal-title\">\n                    <svg class=\"modal-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">\n                        <rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\" ry=\"2\"></rect>\n                        <path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>\n                    </svg>\n                    Trocar Senha\n                </h3>\n                <span class=\"close\" onclick=\"closeChangePasswordModal()\">&times;</span>\n            </div>\n            <div class=\"modal-body\">\n                <form id=\"changePasswordForm\">\n                    <div class=\"form-group\">\n                        <label class=\"form-label\" for=\"newPassword\">Nova Senha</label>\n                        <input type=\"password\" id=\"newPassword\" class=\"form-input\" placeholder=\"Digite a nova senha\" required>\n                    </div>\n                    <div class=\"form-group\">\n                        <label class=\"form-label\" for=\"confirmPassword\">Confirmar Nova Senha</label>\n                        <input type=\"password\" id=\"confirmPassword\" class=\"form-input\" placeholder=\"Confirme a nova senha\" required>\n                    </div>\n                </form>\n            </div>\n            <div class=\"modal-actions\">\n                <button onclick=\"closeChangePasswordModal()\" class=\"btn btn-secondary\">Cancelar</button>\n                <button onclick=\"confirmChangePassword()\" class=\"btn btn-primary\">Alterar Senha</button>\n            </div>\n        </div>\n    </div>\n\n    <!-- Modal para bloquear/desbloquear usuário -->\n    <div id=\"blockUserModal\" class=\"modal\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h3 class=\"modal-title\" id=\"blockModalTitle\">\n                    <svg class=\"modal-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">\n                        <circle cx=\"12\" cy=\"12\" r=\"10\"></circle>\n                        <line x1=\"15\" y1=\"9\" x2=\"9\" y2=\"15\"></line>\n                        <line x1=\"9\" y1=\"9\" x2=\"15\" y2=\"15\"></line>\n                    </svg>\n                    Bloquear Usuário\n                </h3>\n                <span class=\"close\" onclick=\"closeBlockUserModal()\">&times;</span>\n            </div>\n            <div class=\"modal-body\">\n                <p id=\"blockModalMessage\">Tem certeza que deseja bloquear este usuário?</p>\n            </div>\n            <div class=\"modal-actions\">\n                <button onclick=\"closeBlockUserModal()\" class=\"btn btn-secondary\">Cancelar</button>\n                <button onclick=\"confirmBlockUser()\" class=\"btn btn-danger\" id=\"blockConfirmBtn\">Bloquear</button>\n            </div>\n        </div>\n    </div>\n\n\n    <script>\n        let users = [];\n        let currentAction = null;\n        let currentUserId = null;\n\n        async function loadUsers() {\n            try {\n                console.log('Carregando usuários via proxy Node-RED...');\n                const response = await fetch('/api/users-proxy', {\n                    method: 'GET',\n                    headers: {\n                        'Content-Type': 'application/json',\n                    }\n                });\n                \n                console.log('Response status:', response.status);\n                \n                if (response.ok) {\n                    const data = await response.json();\n                    console.log('Dados recebidos via proxy:', data);\n                    \n                    users = data.map((user, index) => ({\n                        id: user.id,\n                        safeId: 'user_' + index,\n                        name: user.name || user.fullName || 'Usuário',\n                        email: user.email,\n                        avatar: user.avatar || user.profileImage || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name || 'U') + '&background=27ae60&color=fff',\n                        status: user.isBlocked ? 'blocked' : 'active',\n                        statusText: user.isBlocked ? 'Inativo - pelo administrador' : 'Ativo desde ' + new Date(user.createdAt || Date.now()).toLocaleDateString('pt-BR'),\n                        joinDate: user.createdAt || new Date().toISOString(),\n                        isBlocked: user.isBlocked || false\n                    }));\n                    \n                    console.log('Usuários processados:', users);\n                    renderUsers();\n                } else {\n                    throw new Error('Erro na API: ' + response.status);\n                }\n            } catch (error) {\n                console.error('Erro ao carregar usuários:', error);\n                document.getElementById('usersList').innerHTML = '<div class=\"error\">Erro ao carregar usuários: ' + error.message + '</div>';\n            }\n        }\n\n        function renderUsers(usersToRender) {\n            if (!usersToRender) usersToRender = users;\n            const usersList = document.getElementById('usersList');\n            \n            if (usersToRender.length === 0) {\n                usersList.innerHTML = '<div class=\"loading\">Nenhum usuário encontrado</div>';\n                return;\n            }\n            \n            usersList.innerHTML = usersToRender.map(function(user) {\n                return '<div class=\"user-item\">' +\n                    '<img src=\"' + user.avatar + '\" alt=\"' + user.name + '\" class=\"user-avatar\">' +\n                    '<div class=\"user-info\">' +\n                        '<div class=\"user-name\">' + user.name + '</div>' +\n                        '<div class=\"user-status ' + user.status + '\">' + user.statusText + '</div>' +\n                    '</div>' +\n                    '<div class=\"user-actions\">' +\n                        '<div class=\"action-btn\" onclick=\"changePassword(\\\\'' + user.safeId + '\\\\')\">' +\n                            '<svg class=\"action-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#2c3e50\" stroke-width=\"2\">' +\n                                '<rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\" ry=\"2\"></rect>' +\n                                '<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>' +\n                            '</svg>' +\n                            '<span class=\"action-text\">Trocar senha</span>' +\n                        '</div>' +\n                        '<div class=\"action-btn\" onclick=\"toggleUserStatus(\\\\'' + user.safeId + '\\\\', ' + user.isBlocked + ')\">' +\n                            '<svg class=\"action-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#e74c3c\" stroke-width=\"2\">' +\n                                '<circle cx=\"12\" cy=\"12\" r=\"10\"></circle>' +\n                                '<line x1=\"15\" y1=\"9\" x2=\"9\" y2=\"15\"></line>' +\n                                '<line x1=\"9\" y1=\"9\" x2=\"15\" y2=\"15\"></line>' +\n                            '</svg>' +\n                            '<span class=\"action-text\">' + (user.status === 'active' ? 'Bloquear' : 'Ativar') + '</span>' +\n                        '</div>' +\n                    '</div>' +\n                '</div>';\n            }).join('');\n        }\n\n        function changePassword(userSafeId) {\n            const user = users.find(function(u) { return u.safeId === userSafeId; });\n            if (!user) return;\n            \n            currentUserId = user.id;\n            document.getElementById('newPassword').value = '';\n            document.getElementById('confirmPassword').value = '';\n            document.getElementById('changePasswordModal').style.display = 'block';\n        }\n\n        async function confirmPasswordChange() {\n            const newPassword = document.getElementById('newPassword').value;\n            const confirmPassword = document.getElementById('confirmPassword').value;\n            \n            if (!newPassword || !confirmPassword) {\n                showToast('Por favor, preencha todos os campos', 'error');\n                return;\n            }\n            \n            if (newPassword !== confirmPassword) {\n                showToast('As senhas não coincidem', 'error');\n                return;\n            }\n            \n            if (newPassword.length < 6) {\n                showToast('A senha deve ter pelo menos 6 caracteres', 'error');\n                return;\n            }\n            \n            try {\n                const response = await fetch('/api/user/password', {\n                    method: 'POST',\n                    headers: {\n                        'Content-Type': 'application/json',\n                    },\n                    body: JSON.stringify({\n                        userId: currentUserId,\n                        newPassword: newPassword\n                    })\n                });\n                \n                const result = await response.json();\n                \n                if (result.success) {\n                    showToast('Senha alterada com sucesso!', 'success');\n                    closeChangePasswordModal();\n                } else {\n                    showToast('Erro ao alterar senha: ' + result.error, 'error');\n                }\n            } catch (error) {\n                console.error('Erro ao alterar senha:', error);\n                showToast('Erro de rede ao alterar senha', 'error');\n            }\n        }\n\n        function toggleUserStatus(userSafeId, currentIsBlocked) {\n            const user = users.find(function(u) { return u.safeId === userSafeId; });\n            if (!user) return;\n            \n            currentUserId = user.id;\n            currentAction = currentIsBlocked ? 'unblock' : 'block';\n            \n            const action = currentIsBlocked ? 'ativar' : 'bloquear';\n            const userName = user.name;\n            \n            document.getElementById('blockModalTitle').innerHTML = \n                '<svg class=\"modal-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">' +\n                    '<circle cx=\"12\" cy=\"12\" r=\"10\"></circle>' +\n                    '<line x1=\"15\" y1=\"9\" x2=\"9\" y2=\"15\"></line>' +\n                    '<line x1=\"9\" y1=\"9\" x2=\"15\" y2=\"15\"></line>' +\n                '</svg>' +\n                action.charAt(0).toUpperCase() + action.slice(1) + ' Usuário';\n            \n            document.getElementById('blockModalMessage').textContent = 'Tem certeza que deseja ' + action + ' o usuário \"' + userName + '\"?';\n            document.getElementById('blockConfirmBtn').textContent = action.charAt(0).toUpperCase() + action.slice(1);\n            document.getElementById('blockConfirmBtn').onclick = confirmUserAction;\n            \n            document.getElementById('blockUserModal').style.display = 'block';\n        }\n\n        async function confirmUserAction() {\n            try {\n                const response = await fetch('/api/user/block', {\n                    method: 'POST',\n                    headers: {\n                        'Content-Type': 'application/json',\n                    },\n                    body: JSON.stringify({\n                        userId: currentUserId,\n                        action: currentAction\n                    })\n                });\n                \n                const result = await response.json();\n                \n                if (result.success) {\n                    const action = currentAction === 'block' ? 'bloqueado' : 'ativado';\n                    showToast('Usuário ' + action + ' com sucesso!', 'success');\n                    closeBlockUserModal();\n                    loadUsers(); // Recarregar lista\n                } else {\n                    showToast('Erro ao ' + currentAction + ' usuário: ' + result.error, 'error');\n                }\n            } catch (error) {\n                console.error('Erro ao ' + currentAction + ' usuário:', error);\n                showToast('Erro de rede ao ' + currentAction + ' usuário', 'error');\n            }\n        }\n\n        function closeChangePasswordModal() {\n            document.getElementById('changePasswordModal').style.display = 'none';\n        }\n\n        function closeBlockUserModal() {\n            document.getElementById('blockUserModal').style.display = 'none';\n            currentUserId = null;\n        }\n\n        function showToast(message, type) {\n            const toast = document.createElement('div');\n            toast.className = 'toast ' + type;\n            toast.textContent = message;\n            document.body.appendChild(toast);\n            \n            setTimeout(function() {\n                toast.remove();\n            }, 4000);\n        }\n\n        function logout() {\n            localStorage.removeItem('adminToken');\n            window.location.href = '/admin';\n        }\n\n        // Event listeners\n        document.getElementById('searchInput').addEventListener('input', function(e) {\n            const searchTerm = e.target.value.toLowerCase();\n            const filteredUsers = users.filter(function(user) {\n                return user.name.toLowerCase().includes(searchTerm) || \n                       user.email.toLowerCase().includes(searchTerm);\n            });\n            renderUsers(filteredUsers);\n        });\n\n        // Fechar modais ao clicar fora\n        window.onclick = function(event) {\n            const changePasswordModal = document.getElementById('changePasswordModal');\n            const blockUserModal = document.getElementById('blockUserModal');\n            \n            if (event.target === changePasswordModal) {\n                closeChangePasswordModal();\n            }\n            if (event.target === blockUserModal) {\n                closeBlockUserModal();\n            }\n        }\n\n        // Verificar autenticação\n        if (!localStorage.getItem('adminToken')) {\n            window.location.href = '/admin';\n        }\n\n        // Carregar usuários ao inicializar\n        loadUsers();\n    </script>\n</body>\n</html>`;\n\nmsg.headers = {\n    'Content-Type': 'text/html; charset=utf-8'\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 300,
+        "wires": [
+            [
+                "users-response"
+            ]
+        ]
+    },
+    {
+        "id": "users-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Users Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 580,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "real-api-trigger",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Users API Proxy",
+        "url": "/api/users-proxy",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 600,
+        "wires": [
+            [
+                "real-api-request"
+            ]
+        ]
+    },
+    {
+        "id": "real-api-request",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Get Users from ReUse API",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:3000/api/users",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "name": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "x": 440,
+        "y": 600,
+        "wires": [
+            [
+                "real-api-processor"
+            ]
+        ]
+    },
+    {
+        "id": "real-api-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process API Response",
+        "func": "// Verificar se a requisição foi bem-sucedida\nif (msg.statusCode === 200) {\n    // Retornar os dados da API\n    msg.payload = msg.payload;\n    msg.statusCode = 200;\n    msg.headers = {\n        'Content-Type': 'application/json',\n        'Access-Control-Allow-Origin': '*'\n    };\n    console.log('API retornou', msg.payload.length, 'usuários');\n} else {\n    // Em caso de erro, retornar dados de fallback\n    const fallbackUsers = [\n        {\"id\":\"fallback1\",\"name\":\"Usuário Teste\",\"email\":\"teste@example.com\",\"avatar\":\"/default-avatar.png\",\"xp\":0,\"level\":1,\"createdAt\":\"2025-09-30T02:45:50.643Z\"}\n    ];\n    msg.payload = fallbackUsers;\n    msg.statusCode = 200;\n    msg.headers = {\n        'Content-Type': 'application/json',\n        'Access-Control-Allow-Origin': '*'\n    };\n    console.log('Usando dados de fallback');\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 600,
+        "wires": [
+            [
+                "real-api-response"
+            ]
+        ]
+    },
+    {
+        "id": "real-api-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "API Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 940,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "offers-api-trigger",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Offers API Proxy",
+        "url": "/api/offers-proxy",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 400,
+        "wires": [
+            [
+                "offers-api-request"
+            ]
+        ]
+    },
+    {
+        "id": "offers-api-request",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Get Offers from ReUse API",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:3000/api/offers",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "name": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "x": 400,
+        "y": 400,
+        "wires": [
+            [
+                "offers-api-processor"
+            ]
+        ]
+    },
+    {
+        "id": "offers-api-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Offers Response",
+        "func": "// Verificar se a requisição foi bem-sucedida\nif (msg.statusCode === 200) {\n    // Retornar os dados da API\n    msg.payload = msg.payload;\n    msg.statusCode = 200;\n    msg.headers = {\n        'Content-Type': 'application/json',\n        'Access-Control-Allow-Origin': '*'\n    };\n    console.log('API retornou', msg.payload.length, 'ofertas');\n} else {\n    // Em caso de erro, retornar dados de fallback\n    const fallbackOffers = [\n        {\"id\":\"fallback1\",\"title\":\"Oferta Teste\",\"description\":\"Descrição da oferta teste\",\"status\":\"pending\",\"isActive\":true,\"createdAt\":\"2025-09-30T02:45:50.643Z\"}\n    ];\n    msg.payload = fallbackOffers;\n    msg.statusCode = 200;\n    msg.headers = {\n        'Content-Type': 'application/json',\n        'Access-Control-Allow-Origin': '*'\n    };\n    console.log('Usando dados de fallback para ofertas');\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 400,
+        "wires": [
+            [
+                "offers-api-response"
+            ]
+        ]
+    },
+    {
+        "id": "offers-api-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Offers API Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 900,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "offers-page-trigger",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Offers Management",
+        "url": "/admin/offers",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 500,
+        "wires": [
+            [
+                "offers-page-processor"
+            ]
+        ]
+    },
+    {
+        "id": "offers-page-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Offers HTML",
+        "func": "msg.payload = `<!DOCTYPE html>\n<html>\n<head>\n    <title>ReUse Admin - Gerenciar Ofertas</title>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;\n            background: #f8f9fa;\n        }\n\n        .header {\n            background: #f8f8f8;\n            padding: 20px 40px;\n            box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n        }\n\n        .logo {\n            color: #27ae60;\n            font-size: 24px;\n            font-weight: bold;\n            display: flex;\n            align-items: center;\n            gap: 15px;\n        }\n\n        .logo-icon {\n            width: 50px;\n            height: 50px;\n            border-radius: 8px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            background: white;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n        }\n\n        .logo-icon img {\n            width: 100%;\n            height: 100%;\n            object-fit: contain;\n            border-radius: 8px;\n        }\n\n        .user-info {\n            display: flex;\n            align-items: center;\n            gap: 1rem;\n        }\n\n        .btn {\n            padding: 0.5rem 1rem;\n            border: none;\n            border-radius: 6px;\n            cursor: pointer;\n            font-weight: 500;\n            transition: all 0.3s ease;\n            text-decoration: none;\n            display: inline-flex;\n            align-items: center;\n            gap: 0.5rem;\n        }\n\n        .btn-danger {\n            background: #e74c3c;\n            color: white;\n        }\n\n        .btn-danger:hover {\n            background: #c0392b;\n            transform: translateY(-2px);\n        }\n\n        .nav {\n            background: #2c3e50;\n            padding: 0;\n            display: flex;\n        }\n\n        .nav a {\n            color: white;\n            text-decoration: none;\n            padding: 15px 30px;\n            transition: all 0.3s;\n        }\n\n        .nav a:hover, .nav a.active {\n            background: #34495e;\n        }\n\n        .container {\n            max-width: 1200px;\n            margin: 0 auto;\n            padding: 30px;\n        }\n\n        .page-title {\n            font-size: 28px;\n            color: #2c3e50;\n            margin-bottom: 30px;\n        }\n\n        .search-container {\n            background: white;\n            padding: 20px;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            margin-bottom: 30px;\n            display: flex;\n            align-items: center;\n            gap: 15px;\n        }\n\n        .search-icon {\n            width: 20px;\n            height: 20px;\n            opacity: 0.5;\n        }\n\n        .search-input {\n            flex: 1;\n            border: none;\n            outline: none;\n            font-size: 16px;\n            color: #333;\n        }\n\n        .search-input::placeholder {\n            color: #999;\n        }\n\n        .offers-list {\n            background: white;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            overflow: hidden;\n        }\n\n        .offer-item {\n            display: flex;\n            align-items: center;\n            padding: 20px;\n            border-bottom: 1px solid #eee;\n            transition: all 0.3s;\n        }\n\n        .offer-item:hover {\n            background: #f8f9fa;\n        }\n\n        .offer-item:last-child {\n            border-bottom: none;\n        }\n\n        .offer-image {\n            width: 80px;\n            height: 80px;\n            border-radius: 8px;\n            object-fit: cover;\n            margin-right: 20px;\n            background: #f0f0f0;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            color: #999;\n        }\n\n        .offer-info {\n            flex: 1;\n        }\n\n        .offer-title {\n            font-size: 18px;\n            font-weight: 600;\n            color: #2c3e50;\n            margin-bottom: 5px;\n        }\n\n        .offer-description {\n            font-size: 14px;\n            color: #666;\n            margin-bottom: 8px;\n            line-height: 1.4;\n        }\n\n        .offer-status {\n            font-size: 14px;\n            color: #666;\n        }\n\n        .offer-status.pending {\n            color: #f39c12;\n        }\n\n        .offer-status.approved {\n            color: #27ae60;\n        }\n\n        .offer-status.rejected {\n            color: #e74c3c;\n        }\n\n        .offer-actions {\n            display: flex;\n            gap: 15px;\n            align-items: center;\n        }\n\n        .action-btn {\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            gap: 5px;\n            cursor: pointer;\n            padding: 10px;\n            border-radius: 6px;\n            transition: all 0.3s;\n        }\n\n        .action-btn:hover {\n            background: #f0f0f0;\n        }\n\n        .action-icon {\n            width: 24px;\n            height: 24px;\n        }\n\n        .action-text {\n            font-size: 12px;\n            color: #666;\n        }\n\n        .loading {\n            text-align: center;\n            padding: 3rem;\n            color: #7f8c8d;\n            font-size: 1.1rem;\n        }\n\n        .error {\n            text-align: center;\n            padding: 3rem;\n            color: #e74c3c;\n            font-size: 1.1rem;\n        }\n\n        /* Modal personalizado com dropShadow e tons de verde */\n        .modal { \n            display: none; \n            position: fixed; \n            z-index: 1000; \n            left: 0; \n            top: 0; \n            width: 100%; \n            height: 100%; \n            background-color: rgba(0,0,0,0.6);\n            backdrop-filter: blur(4px);\n        }\n        .modal-content { \n            background: white; \n            margin: 0 auto; \n            padding: 0; \n            border-radius: 20px; \n            width: 90%; \n            max-width: 600px; \n            box-shadow: \n                0 25px 50px rgba(39, 174, 96, 0.15),\n                0 15px 35px rgba(39, 174, 96, 0.1),\n                0 5px 15px rgba(0,0,0,0.1);\n            animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);\n            border: 1px solid rgba(39, 174, 96, 0.1);\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n        }\n        @keyframes modalSlideIn {\n            from { \n                transform: translate(-50%, -50%) scale(0.9); \n                opacity: 0; \n            }\n            to { \n                transform: translate(-50%, -50%) scale(1); \n                opacity: 1; \n            }\n        }\n        .modal-header { \n            background: linear-gradient(135deg, #27ae60, #2ecc71);\n            color: white; \n            padding: 25px 30px; \n            border-radius: 20px 20px 0 0;\n            display: flex; \n            justify-content: space-between; \n            align-items: center;\n            position: relative;\n            overflow: hidden;\n        }\n        .modal-header::before {\n            content: '';\n            position: absolute;\n            top: 0;\n            left: 0;\n            right: 0;\n            bottom: 0;\n            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);\n            animation: shimmer 2s infinite;\n        }\n        @keyframes shimmer {\n            0% { transform: translateX(-100%); }\n            100% { transform: translateX(100%); }\n        }\n        .modal-title { \n            font-size: 22px; \n            font-weight: 700; \n            margin: 0;\n            display: flex;\n            align-items: center;\n            gap: 12px;\n            position: relative;\n            z-index: 1;\n        }\n        .modal-icon {\n            width: 28px;\n            height: 28px;\n            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));\n        }\n        .close { \n            color: white; \n            font-size: 32px; \n            font-weight: bold; \n            cursor: pointer; \n            opacity: 0.8;\n            transition: all 0.3s;\n            position: relative;\n            z-index: 1;\n            width: 40px;\n            height: 40px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            border-radius: 50%;\n        }\n        .close:hover { \n            opacity: 1; \n            background: rgba(255,255,255,0.2);\n            transform: rotate(90deg);\n        }\n        .modal-body { \n            padding: 35px 30px; \n            max-height: 500px;\n            overflow-y: auto;\n        }\n        .modal-actions { \n            display: flex; \n            gap: 15px; \n            justify-content: flex-end; \n            padding: 25px 30px;\n            background: linear-gradient(135deg, #f8f9fa, #e9ecef);\n            border-radius: 0 0 20px 20px;\n            border-top: 1px solid rgba(39, 174, 96, 0.1);\n        }\n        \n        /* Estilos para detalhes da oferta */\n        .offer-details {\n            display: grid;\n            gap: 20px;\n        }\n        .detail-section {\n            background: #f8f9fa;\n            padding: 15px;\n            border-radius: 8px;\n        }\n        .detail-label {\n            font-weight: 600;\n            color: #2c3e50;\n            margin-bottom: 5px;\n            font-size: 14px;\n        }\n        .detail-value {\n            color: #666;\n            font-size: 14px;\n            line-height: 1.4;\n        }\n        .detail-image {\n            width: 100%;\n            max-width: 200px;\n            height: 150px;\n            object-fit: cover;\n            border-radius: 8px;\n            margin: 10px 0;\n        }\n\n        .btn-primary {\n            background: #27ae60;\n            color: white;\n        }\n\n        .btn-primary:hover {\n            background: #229954;\n        }\n\n        .btn-secondary {\n            background: #95a5a6;\n            color: white;\n        }\n\n        .btn-secondary:hover {\n            background: #7f8c8d;\n        }\n\n        /* Toast notifications */\n        .toast {\n            position: fixed;\n            top: 20px;\n            right: 20px;\n            z-index: 9999;\n            padding: 16px 24px;\n            border-radius: 12px;\n            box-shadow: \n                0 10px 25px rgba(39, 174, 96, 0.15),\n                0 5px 15px rgba(0,0,0,0.1);\n            color: white;\n            font-weight: 500;\n            animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);\n            backdrop-filter: blur(10px);\n        }\n        .toast.success { \n            background: linear-gradient(135deg, #27ae60, #2ecc71);\n            border: 1px solid rgba(39, 174, 96, 0.3);\n        }\n        .toast.error { \n            background: linear-gradient(135deg, #e74c3c, #c0392b);\n            border: 1px solid rgba(231, 76, 60, 0.3);\n        }\n        .toast.warning { \n            background: linear-gradient(135deg, #f39c12, #e67e22);\n            border: 1px solid rgba(243, 156, 18, 0.3);\n        }\n        @keyframes toastSlideIn {\n            from { \n                transform: translateX(100%) scale(0.8); \n                opacity: 0; \n            }\n            to { \n                transform: translateX(0) scale(1); \n                opacity: 1; \n            }\n        }\n    </style>\n</head>\n<body>\n    <div class=\"header\">\n        <div class=\"logo\">\n            <div class=\"logo-icon\">\n                <img src=\"https://i.imgur.com/OD3laQP.png\" alt=\"ReUse Logo\">\n            </div>\n            <span>ReUse!</span>\n        </div>\n        <div class=\"user-info\">\n            <span>Bem-vindo, Admin</span>\n            <button onclick=\"logout()\" class=\"btn btn-danger\">Sair</button>\n        </div>\n    </div>\n    <div class=\"nav\">\n        <a href=\"/admin/dashboard\">📊 Dashboard</a>\n        <a href=\"/admin/users\">👥 Usuários</a>\n        <a href=\"/admin/offers\" class=\"active\">📦 Ofertas</a>\n    </div>\n    <div class=\"container\">\n        <h1 class=\"page-title\">Gerenciar ofertas</h1>\n        <div class=\"search-container\">\n            <img src=\"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5IDE5TDEzIDEzTTE1IDhBNyA3IDAgMSAxIDE1IDhBNyA3IDAgMSAxIDE1IDh6IiBzdHJva2U9IiM5OTk5OTkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=\" class=\"search-icon\" alt=\"Buscar\">\n            <input type=\"text\" class=\"search-input\" placeholder=\"buscar oferta\" id=\"searchInput\">\n            <button onclick=\"loadOffers()\" class=\"refresh-btn\">🔄 Atualizar</button>\n        </div>\n        <div class=\"offers-list\" id=\"offersList\">\n            <div class=\"loading\">Carregando ofertas da API...</div>\n        </div>\n    </div>\n\n    <!-- Modal para detalhes da oferta -->\n    <div id=\"detailsModal\" class=\"modal\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h3 class=\"modal-title\">\n                    <svg class=\"modal-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">\n                        <path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path>\n                        <circle cx=\"12\" cy=\"12\" r=\"3\"></circle>\n                    </svg>\n                    Detalhes da Oferta\n                </h3>\n                <span class=\"close\" onclick=\"closeDetailsModal()\">&times;</span>\n            </div>\n            <div class=\"modal-body\" id=\"detailsContent\">\n                <!-- Conteúdo será preenchido dinamicamente -->\n            </div>\n            <div class=\"modal-actions\">\n                <button onclick=\"closeDetailsModal()\" class=\"btn btn-primary\">Fechar</button>\n            </div>\n        </div>\n    </div>\n\n    <!-- Modal para confirmação -->\n    <div id=\"confirmModal\" class=\"modal\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h3 class=\"modal-title\" id=\"modalTitle\">\n                    <svg class=\"modal-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">\n                        <circle cx=\"12\" cy=\"12\" r=\"10\"></circle>\n                        <line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"12\"></line>\n                        <line x1=\"12\" y1=\"16\" x2=\"12.01\" y2=\"16\"></line>\n                    </svg>\n                    Confirmar ação\n                </h3>\n                <span class=\"close\" onclick=\"closeConfirmModal()\">&times;</span>\n            </div>\n            <div class=\"modal-body\">\n                <p id=\"modalMessage\">Tem certeza que deseja realizar esta ação?</p>\n            </div>\n            <div class=\"modal-actions\">\n                <button onclick=\"closeConfirmModal()\" class=\"btn btn-secondary\">Cancelar</button>\n                <button onclick=\"confirmAction()\" class=\"btn btn-danger\" id=\"confirmBtn\">Confirmar</button>\n            </div>\n        </div>\n    </div>\n\n\n    <script>\n        let offers = [];\n        let currentOfferId = null;\n\n        async function loadOffers() {\n            try {\n                console.log('Carregando ofertas via proxy Node-RED...');\n                const response = await fetch('/api/offers-proxy', {\n                    method: 'GET',\n                    headers: {\n                        'Content-Type': 'application/json',\n                    }\n                });\n                \n                console.log('Response status:', response.status);\n                \n                if (response.ok) {\n                    const data = await response.json();\n                    console.log('Dados recebidos via proxy:', data);\n                    \n                    offers = data.map((offer, index) => {\n                        // Gerar título dinamicamente se não existir\n                        let title = offer.title;\n                        if (!title || title.trim() === '') {\n                            if (offer.description && offer.description.trim() !== '') {\n                                title = offer.description.substring(0, 50) + (offer.description.length > 50 ? '...' : '');\n                            } else if (offer.category && offer.category.trim() !== '') {\n                                title = 'Oferta de ' + offer.category;\n                            } else {\n                                title = 'Oferta #' + offer.id;\n                            }\n                        }\n                        \n                        return {\n                            id: offer.id,\n                            safeId: 'offer_' + index,\n                            title: title,\n                            description: offer.description || 'Sem descrição',\n                            category: offer.category || 'Sem categoria',\n                            image: offer.image || offer.images?.[0] || 'https://via.placeholder.com/300x200?text=Sem+Imagem',\n                            status: offer.status || 'pending',\n                            isActive: offer.isActive !== false,\n                            createdAt: offer.createdAt || new Date().toISOString(),\n                            author: offer.author || offer.user || 'Usuário desconhecido'\n                        };\n                    });\n                    \n                    console.log('Ofertas processadas:', offers);\n                    renderOffers();\n                } else {\n                    throw new Error('Erro na API: ' + response.status);\n                }\n            } catch (error) {\n                console.error('Erro ao carregar ofertas:', error);\n                document.getElementById('offersList').innerHTML = '<div class=\"error\">Erro ao carregar ofertas: ' + error.message + '</div>';\n            }\n        }\n\n        function renderOffers(offersToRender) {\n            if (!offersToRender) offersToRender = offers;\n            const offersList = document.getElementById('offersList');\n            \n            if (offersToRender.length === 0) {\n                offersList.innerHTML = '<div class=\"loading\">Nenhuma oferta encontrada</div>';\n                return;\n            }\n            \n            offersList.innerHTML = offersToRender.map(function(offer) {\n                const statusClass = offer.isActive ? 'approved' : (offer.status === 'rejected' ? 'rejected' : 'pending');\n                const statusText = offer.isActive ? 'Ativa' : (offer.status === 'rejected' ? 'Rejeitada' : 'Pendente');\n                \n                return '<div class=\"offer-item\">' +\n                    '<div class=\"offer-image\">' +\n                        (offer.image ? '<img src=\"' + offer.image + '\" alt=\"' + offer.title + '\" style=\"width: 100%; height: 100%; object-fit: cover; border-radius: 8px;\">' : '📦') +\n                    '</div>' +\n                    '<div class=\"offer-info\">' +\n                        '<div class=\"offer-title\">' + offer.title + '</div>' +\n                        '<div class=\"offer-description\">' + offer.description.substring(0, 100) + (offer.description.length > 100 ? '...' : '') + '</div>' +\n                        '<div class=\"offer-status ' + statusClass + '\">' + statusText + ' • Criada em ' + new Date(offer.createdAt).toLocaleDateString('pt-BR') + '</div>' +\n                    '</div>' +\n                    '<div class=\"offer-actions\">' +\n                        '<div class=\"action-btn\" onclick=\"viewDetails(\\\\'' + offer.safeId + '\\\\')\">' +\n                            '<svg class=\"action-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#3498db\" stroke-width=\"2\">' +\n                                '<path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path>' +\n                                '<circle cx=\"12\" cy=\"12\" r=\"3\"></circle>' +\n                            '</svg>' +\n                            '<span class=\"action-text\">Ver detalhes</span>' +\n                        '</div>' +\n                        '<div class=\"action-btn\" onclick=\"deleteOffer(\\\\'' + offer.safeId + '\\\\')\">' +\n                            '<svg class=\"action-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#e74c3c\" stroke-width=\"2\">' +\n                                '<polyline points=\"3,6 5,6 21,6\"></polyline>' +\n                                '<path d=\"M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2\"></path>' +\n                            '</svg>' +\n                            '<span class=\"action-text\">Remover</span>' +\n                        '</div>' +\n                    '</div>' +\n                '</div>';\n            }).join('');\n        }\n\n        function viewDetails(offerSafeId) {\n            const offer = offers.find(function(o) { return o.safeId === offerSafeId; });\n            \n            const detailsContent = document.getElementById('detailsContent');\n            detailsContent.innerHTML = '<div class=\"offer-details\">' +\n                '<div class=\"detail-section\">' +\n                    '<div class=\"detail-label\">📦 Título</div>' +\n                    '<div class=\"detail-value\">' + offer.title + '</div>' +\n                '</div>' +\n                '<div class=\"detail-section\">' +\n                    '<div class=\"detail-label\">📝 Descrição</div>' +\n                    '<div class=\"detail-value\">' + offer.description + '</div>' +\n                '</div>' +\n                (offer.image ? '<div class=\"detail-section\">' +\n                    '<div class=\"detail-label\">🖼️ Imagem</div>' +\n                    '<img src=\"' + offer.image + '\" alt=\"' + offer.title + '\" class=\"detail-image\">' +\n                '</div>' : '') +\n                '<div class=\"detail-section\">' +\n                    '<div class=\"detail-label\">🏷️ Categoria</div>' +\n                    '<div class=\"detail-value\">' + offer.category + '</div>' +\n                '</div>' +\n                '<div class=\"detail-section\">' +\n                    '<div class=\"detail-label\">👤 Autor</div>' +\n                    '<div class=\"detail-value\">' + offer.author + '</div>' +\n                '</div>' +\n                '<div class=\"detail-section\">' +\n                    '<div class=\"detail-label\">📊 Status</div>' +\n                    '<div class=\"detail-value\">' + (offer.isActive ? '✅ Ativa' : '❌ Inativa') + '</div>' +\n                '</div>' +\n                '<div class=\"detail-section\">' +\n                    '<div class=\"detail-label\">📅 Data de Criação</div>' +\n                    '<div class=\"detail-value\">' + new Date(offer.createdAt).toLocaleString('pt-BR') + '</div>' +\n                '</div>' +\n            '</div>';\n            \n            document.getElementById('detailsModal').style.display = 'block';\n        }\n\n\n        function deleteOffer(offerSafeId) {\n            const offer = offers.find(function(o) { return o.safeId === offerSafeId; });\n            if (!offer) return;\n            \n            currentOfferId = offer.id;\n            \n            const offerTitle = offer.title;\n            \n            document.getElementById('modalTitle').innerHTML = \n                '<svg class=\"modal-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">' +\n                    '<polyline points=\"3,6 5,6 21,6\"></polyline>' +\n                    '<path d=\"M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2\"></path>' +\n                '</svg>' +\n                'Remover Oferta';\n            \n            document.getElementById('modalMessage').textContent = 'Tem certeza que deseja remover permanentemente a oferta \"' + offerTitle + '\"? Esta ação não pode ser desfeita.';\n            document.getElementById('confirmBtn').textContent = 'Remover';\n            document.getElementById('confirmBtn').className = 'btn btn-danger';\n            \n            document.getElementById('confirmModal').style.display = 'block';\n        }\n\n        function confirmAction() {\n            confirmOfferAction();\n            closeConfirmModal();\n        }\n\n        async function confirmOfferAction() {\n            try {\n                const response = await fetch('/api/offer/delete', {\n                    method: 'POST',\n                    headers: {\n                        'Content-Type': 'application/json',\n                    },\n                    body: JSON.stringify({\n                        offerId: currentOfferId\n                    })\n                });\n                \n                const result = await response.json();\n                \n                if (result.success) {\n                    showToast('Oferta removida com sucesso!', 'success');\n                    loadOffers(); // Recarregar lista\n                } else {\n                    showToast('Erro ao remover oferta: ' + result.error, 'error');\n                }\n            } catch (error) {\n                console.error('Erro ao remover oferta:', error);\n                showToast('Erro de rede ao remover oferta', 'error');\n            }\n        }\n\n        function closeDetailsModal() {\n            document.getElementById('detailsModal').style.display = 'none';\n        }\n\n        function closeConfirmModal() {\n            document.getElementById('confirmModal').style.display = 'none';\n            currentOfferId = null;\n        }\n\n        function showToast(message, type) {\n            const toast = document.createElement('div');\n            toast.className = 'toast ' + type;\n            toast.textContent = message;\n            document.body.appendChild(toast);\n            \n            setTimeout(function() {\n                toast.remove();\n            }, 4000);\n        }\n\n        function logout() {\n            localStorage.removeItem('adminToken');\n            window.location.href = '/admin';\n        }\n\n        // Event listeners\n        document.getElementById('searchInput').addEventListener('input', function(e) {\n            const searchTerm = e.target.value.toLowerCase();\n            const filteredOffers = offers.filter(function(offer) {\n                return offer.title.toLowerCase().includes(searchTerm) || \n                       offer.description.toLowerCase().includes(searchTerm) ||\n                       offer.category.toLowerCase().includes(searchTerm);\n            });\n            renderOffers(filteredOffers);\n        });\n\n        // Fechar modais ao clicar fora\n        window.onclick = function(event) {\n            const detailsModal = document.getElementById('detailsModal');\n            const confirmModal = document.getElementById('confirmModal');\n            \n            if (event.target === detailsModal) {\n                closeDetailsModal();\n            }\n            if (event.target === confirmModal) {\n                closeConfirmModal();\n            }\n        }\n\n        // Verificar autenticação\n        if (!localStorage.getItem('adminToken')) {\n            window.location.href = '/admin';\n        }\n\n        // Carregar ofertas ao inicializar\n        loadOffers();\n    </script>\n</body>\n</html>`;\n\nmsg.headers = {\n    'Content-Type': 'text/html; charset=utf-8'\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 500,
+        "wires": [
+            [
+                "offers-page-response"
+            ]
+        ]
+    },
+    {
+        "id": "offers-page-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Offers Page Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 680,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "user-block-endpoint",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Block User",
+        "url": "/api/user/block",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 760,
+        "wires": [
+            [
+                "user-block-processor"
+            ]
+        ]
+    },
+    {
+        "id": "user-block-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Block User",
+        "func": "const userId = msg.payload.userId;\nconst action = msg.payload.action; // 'block' or 'unblock'\n\nif (!userId) {\n    msg.statusCode = 400;\n    msg.payload = { success: false, error: 'ID do usuário é obrigatório' };\n    return msg;\n}\n\n// Preparar dados para a API do ReUse\nmsg.url = `http://localhost:3000/api/users/${userId}`;\nmsg.method = 'PATCH';\nmsg.headers = {\n    'Content-Type': 'application/json'\n};\n\n// Dados para bloquear/desbloquear\nmsg.payload = {\n    isBlocked: action === 'block'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 760,
+        "wires": [
+            [
+                "http-request-user-action"
+            ]
+        ]
+    },
+    {
+        "id": "http-request-user-action",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Update User in ReUse API",
+        "method": "PATCH",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "x": 680,
+        "y": 760,
+        "wires": [
+            [
+                "user-action-response"
+            ]
+        ]
+    },
+    {
+        "id": "user-action-response",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Format User Action Response",
+        "func": "if (msg.statusCode >= 200 && msg.statusCode < 300) {\n    msg.payload = {\n        success: true,\n        message: 'Usuário atualizado com sucesso',\n        data: msg.payload\n    };\n} else {\n    msg.payload = {\n        success: false,\n        error: 'Erro ao atualizar usuário: ' + (msg.payload.message || 'Erro desconhecido')\n    };\n}\n\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 760,
+        "wires": [
+            [
+                "user-action-http-response"
+            ]
+        ]
+    },
+    {
+        "id": "user-action-http-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "User Action Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1200,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "user-password-endpoint",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Change User Password",
+        "url": "/api/user/password",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 860,
+        "wires": [
+            [
+                "user-password-processor"
+            ]
+        ]
+    },
+    {
+        "id": "user-password-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Password Change",
+        "func": "const userId = msg.payload.userId;\nconst newPassword = msg.payload.newPassword;\n\nif (!userId || !newPassword) {\n    msg.statusCode = 400;\n    msg.payload = { success: false, error: 'ID do usuário e nova senha são obrigatórios' };\n    return msg;\n}\n\n// Preparar dados para a API do ReUse\nmsg.url = `http://localhost:3000/api/users/${userId}/password`;\nmsg.method = 'PATCH';\nmsg.headers = {\n    'Content-Type': 'application/json'\n};\n\n// Dados para trocar senha\nmsg.payload = {\n    password: newPassword\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 860,
+        "wires": [
+            [
+                "http-request-password-change"
+            ]
+        ]
+    },
+    {
+        "id": "http-request-password-change",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Change Password in ReUse API",
+        "method": "PATCH",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "x": 690,
+        "y": 860,
+        "wires": [
+            [
+                "password-change-response"
+            ]
+        ]
+    },
+    {
+        "id": "password-change-response",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Format Password Change Response",
+        "func": "if (msg.statusCode >= 200 && msg.statusCode < 300) {\n    msg.payload = {\n        success: true,\n        message: 'Senha alterada com sucesso'\n    };\n} else {\n    msg.payload = {\n        success: false,\n        error: 'Erro ao alterar senha: ' + (msg.payload.message || 'Erro desconhecido')\n    };\n}\n\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 860,
+        "wires": [
+            [
+                "password-change-http-response"
+            ]
+        ]
+    },
+    {
+        "id": "password-change-http-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Password Change Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1320,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "offer-status-endpoint",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Change Offer Status",
+        "url": "/api/offer/status",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 980,
+        "wires": [
+            [
+                "offer-status-processor"
+            ]
+        ]
+    },
+    {
+        "id": "offer-status-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Offer Status Change",
+        "func": "const offerId = msg.payload.offerId;\nconst action = msg.payload.action; // 'activate', 'deactivate', 'approve', 'reject'\n\nif (!offerId || !action) {\n    msg.statusCode = 400;\n    msg.payload = { success: false, error: 'ID da oferta e ação são obrigatórios' };\n    return msg;\n}\n\n// Preparar dados para a API do ReUse\nmsg.url = `http://localhost:3000/api/offers/${offerId}`;\nmsg.method = 'PATCH';\nmsg.headers = {\n    'Content-Type': 'application/json'\n};\n\n// Mapear ações para campos da API\nlet updateData = {};\nswitch(action) {\n    case 'activate':\n        updateData = { isActive: true, status: 'approved' };\n        break;\n    case 'deactivate':\n        updateData = { isActive: false };\n        break;\n    case 'approve':\n        updateData = { status: 'approved', isActive: true };\n        break;\n    case 'reject':\n        updateData = { status: 'rejected', isActive: false };\n        break;\n    default:\n        msg.statusCode = 400;\n        msg.payload = { success: false, error: 'Ação inválida' };\n        return msg;\n}\n\nmsg.payload = updateData;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 980,
+        "wires": [
+            [
+                "http-request-offer-action"
+            ]
+        ]
+    },
+    {
+        "id": "http-request-offer-action",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Update Offer in ReUse API",
+        "method": "PATCH",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "x": 770,
+        "y": 980,
+        "wires": [
+            [
+                "offer-action-response"
+            ]
+        ]
+    },
+    {
+        "id": "offer-action-response",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Format Offer Action Response",
+        "func": "if (msg.statusCode >= 200 && msg.statusCode < 300) {\n    msg.payload = {\n        success: true,\n        message: 'Oferta atualizada com sucesso',\n        data: msg.payload\n    };\n} else {\n    msg.payload = {\n        success: false,\n        error: 'Erro ao atualizar oferta: ' + (msg.payload.message || 'Erro desconhecido')\n    };\n}\n\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1050,
+        "y": 980,
+        "wires": [
+            [
+                "offer-action-http-response"
+            ]
+        ]
+    },
+    {
+        "id": "offer-action-http-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Offer Action Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1340,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "offer-delete-endpoint",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Delete Offer",
+        "url": "/api/offer/delete",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 1080,
+        "wires": [
+            [
+                "offer-delete-processor"
+            ]
+        ]
+    },
+    {
+        "id": "offer-delete-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Offer Delete",
+        "func": "const offerId = msg.payload.offerId;\n\nif (!offerId) {\n    msg.statusCode = 400;\n    msg.payload = { success: false, error: 'ID da oferta é obrigatório' };\n    return msg;\n}\n\n// Preparar dados para a API do ReUse\nmsg.url = `http://localhost:3000/api/offers/${offerId}`;\nmsg.method = 'DELETE';\nmsg.headers = {\n    'Content-Type': 'application/json'\n};\n\n// Para DELETE, não precisamos de payload\nmsg.payload = {};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 1080,
+        "wires": [
+            [
+                "http-request-offer-delete"
+            ]
+        ]
+    },
+    {
+        "id": "http-request-offer-delete",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Delete Offer from ReUse API",
+        "method": "DELETE",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "x": 670,
+        "y": 1080,
+        "wires": [
+            [
+                "offer-delete-response"
+            ]
+        ]
+    },
+    {
+        "id": "offer-delete-response",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Format Offer Delete Response",
+        "func": "if (msg.statusCode >= 200 && msg.statusCode < 300) {\n    msg.payload = {\n        success: true,\n        message: 'Oferta removida com sucesso'\n    };\n} else {\n    msg.payload = {\n        success: false,\n        error: 'Erro ao remover oferta: ' + (msg.payload.message || 'Erro desconhecido')\n    };\n}\n\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 1080,
+        "wires": [
+            [
+                "offer-delete-http-response"
+            ]
+        ]
+    },
+    {
+        "id": "offer-delete-http-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Offer Delete Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1220,
+        "y": 1080,
+        "wires": []
+    }
+]

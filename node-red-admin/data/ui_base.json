@@ -1,0 +1,62 @@
+{
+    "id": "ui_base",
+    "type": "ui_base",
+    "name": "ReUse Admin Dashboard",
+    "path": "/ui",
+    "includeClientData": true,
+    "acceptsClientConfig": [
+        "ui-notification",
+        "ui-control"
+    ],
+    "showPathInSidebar": true,
+    "showStatusInSidebar": true,
+    "showTabsInSidebar": true,
+    "showToolsInSidebar": true,
+    "sidebarWidth": 250,
+    "page": {
+        "title": "ReUse Admin Panel",
+        "favicon": "/ui_base/favicon.ico",
+        "tab": {
+            "id": "main-tab",
+            "label": "Dashboard",
+            "icon": "dashboard",
+            "order": 1,
+            "disabled": false,
+            "visible": true
+        },
+        "path": "/",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": true,
+        "showStatusInSidebar": true,
+        "showTabsInSidebar": true,
+        "showToolsInSidebar": true,
+        "sidebarWidth": 250
+    },
+    "site": {
+        "title": "ReUse Admin Panel",
+        "favicon": "/ui_base/favicon.ico",
+        "tab": {
+            "id": "main-tab",
+            "label": "Dashboard",
+            "icon": "dashboard",
+            "order": 1,
+            "disabled": false,
+            "visible": true
+        },
+        "path": "/",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": true,
+        "showStatusInSidebar": true,
+        "showTabsInSidebar": true,
+        "showToolsInSidebar": true,
+        "sidebarWidth": 250
+    }
+}

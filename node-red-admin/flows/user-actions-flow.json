@@ -1,0 +1,183 @@
+[
+    {
+        "id": "user-block-endpoint",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Block User",
+        "url": "/api/user/block",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 700,
+        "wires": [
+            [
+                "user-block-processor"
+            ]
+        ]
+    },
+    {
+        "id": "user-block-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Block User",
+        "func": "const userId = msg.payload.userId;\nconst action = msg.payload.action; // 'block' or 'unblock'\n\nif (!userId) {\n    msg.statusCode = 400;\n    msg.payload = { success: false, error: 'ID do usuário é obrigatório' };\n    return msg;\n}\n\n// Preparar dados para a API do ReUse\nmsg.url = `http://localhost:3000/api/users/${userId}`;\nmsg.method = 'PATCH';\nmsg.headers = {\n    'Content-Type': 'application/json'\n};\n\n// Dados para bloquear/desbloquear\nmsg.payload = {\n    isBlocked: action === 'block'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 700,
+        "wires": [
+            [
+                "http-request-user-action"
+            ]
+        ]
+    },
+    {
+        "id": "http-request-user-action",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Update User in ReUse API",
+        "method": "PATCH",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "x": 640,
+        "y": 700,
+        "wires": [
+            [
+                "user-action-response"
+            ]
+        ]
+    },
+    {
+        "id": "user-action-response",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Format User Action Response",
+        "func": "if (msg.statusCode >= 200 && msg.statusCode < 300) {\n    msg.payload = {\n        success: true,\n        message: 'Usuário atualizado com sucesso',\n        data: msg.payload\n    };\n} else {\n    msg.payload = {\n        success: false,\n        error: 'Erro ao atualizar usuário: ' + (msg.payload.message || 'Erro desconhecido')\n    };\n}\n\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 700,
+        "wires": [
+            [
+                "user-action-http-response"
+            ]
+        ]
+    },
+    {
+        "id": "user-action-http-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "User Action Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1160,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "user-password-endpoint",
+        "type": "http in",
+        "z": "simple-admin-flow",
+        "name": "Change User Password",
+        "url": "/api/user/password",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 800,
+        "wires": [
+            [
+                "user-password-processor"
+            ]
+        ]
+    },
+    {
+        "id": "user-password-processor",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Process Password Change",
+        "func": "const userId = msg.payload.userId;\nconst newPassword = msg.payload.newPassword;\n\nif (!userId || !newPassword) {\n    msg.statusCode = 400;\n    msg.payload = { success: false, error: 'ID do usuário e nova senha são obrigatórios' };\n    return msg;\n}\n\n// Preparar dados para a API do ReUse\nmsg.url = `http://localhost:3000/api/users/${userId}/password`;\nmsg.method = 'PATCH';\nmsg.headers = {\n    'Content-Type': 'application/json'\n};\n\n// Dados para trocar senha\nmsg.payload = {\n    password: newPassword\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 800,
+        "wires": [
+            [
+                "http-request-password-change"
+            ]
+        ]
+    },
+    {
+        "id": "http-request-password-change",
+        "type": "http request",
+        "z": "simple-admin-flow",
+        "name": "Change Password in ReUse API",
+        "method": "PATCH",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "x": 640,
+        "y": 800,
+        "wires": [
+            [
+                "password-change-response"
+            ]
+        ]
+    },
+    {
+        "id": "password-change-response",
+        "type": "function",
+        "z": "simple-admin-flow",
+        "name": "Format Password Change Response",
+        "func": "if (msg.statusCode >= 200 && msg.statusCode < 300) {\n    msg.payload = {\n        success: true,\n        message: 'Senha alterada com sucesso'\n    };\n} else {\n    msg.payload = {\n        success: false,\n        error: 'Erro ao alterar senha: ' + (msg.payload.message || 'Erro desconhecido')\n    };\n}\n\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 800,
+        "wires": [
+            [
+                "password-change-http-response"
+            ]
+        ]
+    },
+    {
+        "id": "password-change-http-response",
+        "type": "http response",
+        "z": "simple-admin-flow",
+        "name": "Password Change Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1160,
+        "y": 800,
+        "wires": []
+    }
+]
+
+
+
