@@ -64,12 +64,18 @@ No dashboard do Vercel, adicione as seguintes variáveis:
 
 ### 3. Configurar Banco de Dados PostgreSQL
 
-**Opção A: Vercel Postgres (Recomendado)**
+**Opção A: Supabase (Recomendado) ⭐**
+1. Crie um projeto no Supabase (gratuito): https://supabase.com
+2. Siga o guia rápido: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+3. Ou veja o guia completo: [DATABASE_SETUP.md](./DATABASE_SETUP.md)
+4. Copie a `DATABASE_URL` do Supabase e adicione nas variáveis de ambiente do Vercel
+
+**Opção B: Vercel Postgres**
 1. No projeto Vercel, vá em "Storage" > "Create Database"
 2. Selecione "Postgres"
 3. Copie a `DATABASE_URL` gerada e adicione nas variáveis de ambiente
 
-**Opção B: Supabase/Neon/Outros**
+**Opção C: Neon ou Outros**
 1. Crie um banco PostgreSQL no seu provedor
 2. Copie a connection string
 3. Adicione como `DATABASE_URL` nas variáveis de ambiente do Vercel
