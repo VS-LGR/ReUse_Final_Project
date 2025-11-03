@@ -14,15 +14,59 @@ export default function AddOfferPage() {
   const [price, setPrice] = useState('');
   const router = useRouter();
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setProductImage(result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validar tipo
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor, selecione uma imagem válida');
+      return;
+    }
+
+    // Validar tamanho (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('A imagem é muito grande. Máximo: 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      // Criar FormData para upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Tentar upload para Supabase primeiro, depois fallback para local
+      let uploadUrl = '/api/upload/supabase';
+      let response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData,
+      });
+
+      // Se Supabase falhar, usar upload local
+      if (!response.ok) {
+        console.log('Supabase não disponível, usando upload local');
+        uploadUrl = '/api/upload';
+        response = await fetch(uploadUrl, {
+          method: 'POST',
+          body: formData,
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error('Erro ao fazer upload');
+      }
+
+      const data = await response.json();
+      setProductImage(data.url);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Erro ao fazer upload da imagem. Tente novamente.');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -94,7 +138,12 @@ export default function AddOfferPage() {
             Foto do Produto *
           </label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center relative">
-            {productImage ? (
+            {uploadingImage ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mb-2"></div>
+                <p className="text-gray-500 text-sm">Enviando imagem...</p>
+              </div>
+            ) : productImage ? (
               <div className="relative">
                 <Image
                   src={productImage}
@@ -105,7 +154,7 @@ export default function AddOfferPage() {
                 />
                 <button
                   onClick={() => setProductImage(null)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
                 >
                   ×
                 </button>
@@ -116,6 +165,7 @@ export default function AddOfferPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <p className="text-gray-500 text-sm">Clique para adicionar foto</p>
+                <p className="text-gray-400 text-xs mt-1">Máximo: 5MB</p>
               </div>
             )}
             <input

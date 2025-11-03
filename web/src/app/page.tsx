@@ -121,9 +121,20 @@ export default function Home() {
         {/* Register Button */}
         <Link 
           href="/register"
-          className="bg-green-500 text-white px-8 py-4 rounded-lg font-bold text-lg w-full max-w-xs"
+          className="bg-green-500 text-white px-8 py-4 rounded-lg font-bold text-lg w-full max-w-xs mb-4"
         >
           Cadastre-se aqui
+        </Link>
+
+        {/* Chatbot Button */}
+        <Link 
+          href="/chatbot"
+          className="bg-teal-500 text-white px-8 py-3 rounded-lg font-semibold w-full max-w-xs flex items-center justify-center gap-2 hover:bg-teal-600 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+          Falar com o Assistente
         </Link>
       </div>
 
