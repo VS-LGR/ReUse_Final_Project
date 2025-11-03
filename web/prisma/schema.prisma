@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String
+  password    String
+  avatar      String?
+  theme       String    @default("Claro")
+  language    String    @default("pt-BR")
+  xp          Int       @default(0)
+  level       Int       @default(1)
+  isActive    Boolean   @default(true)
+  isBlocked   Boolean   @default(false)
+  blockReason String?
+  blockedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  messages    Message[]
+  offers      Offer[]
+  chats       Chat[]    @relation("ChatParticipants")
+
+  @@map("users")
+}
+
+model Offer {
+  id             String    @id @default(cuid())
+  name           String
+  description    String
+  image          String
+  desiredItem    String
+  condition      String
+  price          String
+  category       String
+  rating         Int       @default(5)
+  isActive       Boolean   @default(true)
+  status         String    @default("pending") // pending, approved, rejected
+  rejectionReason String?
+  approvedAt     DateTime?
+  rejectedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  ownerId        String
+  owner          User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@map("offers")
+}
+
+model Chat {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  messages     Message[]
+  participants User[]    @relation("ChatParticipants")
+
+  @@map("chats")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  chatId    String
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
