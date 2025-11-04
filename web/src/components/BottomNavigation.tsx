@@ -95,9 +95,9 @@ export default function BottomNavigation() {
 
       {/* CONFIGURAÇÕES - Settings */}
       <button
-        onClick={() => router.push('/profile')}
+        onClick={() => router.push('/settings')}
         className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-          pathname.includes('settings') || pathname === '/profile'
+          isActive('/settings')
             ? 'text-green-600' 
             : 'text-gray-600 hover:text-gray-800'
         }`}
@@ -105,7 +105,7 @@ export default function BottomNavigation() {
       >
         <svg 
           className="w-6 h-6" 
-          fill={pathname.includes('settings') ? 'currentColor' : 'none'} 
+          fill={isActive('/settings') ? 'currentColor' : 'none'} 
           stroke="currentColor" 
           viewBox="0 0 24 24"
         >

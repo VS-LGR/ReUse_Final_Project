@@ -29,12 +29,29 @@ export default function MyOffersPage() {
 
   const loadMyOffers = async () => {
     try {
-      // TODO: Implementar filtro para buscar apenas ofertas do usuário logado
-      // Por enquanto, carrega todas as ofertas
-      const response = await fetch('/api/offers')
+      // Buscar dados do usuário logado
+      const userDataStr = localStorage.getItem('@logged_in_user')
+      if (!userDataStr) {
+        router.push('/login')
+        return
+      }
+
+      const userData = JSON.parse(userDataStr)
+      const userId = userData.id
+
+      if (!userId) {
+        console.error('Usuário não possui ID')
+        setLoading(false)
+        return
+      }
+
+      // Buscar apenas ofertas do usuário logado
+      const response = await fetch(`/api/my-offers?userId=${userId}`)
       if (response.ok) {
         const data = await response.json()
         setOffers(data)
+      } else {
+        console.error('Erro ao buscar ofertas do usuário')
       }
     } catch (error) {
       console.error('Erro ao carregar ofertas:', error)
