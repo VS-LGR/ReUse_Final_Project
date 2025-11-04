@@ -111,10 +111,11 @@ Após criar o fluxo, você verá uma tela com informações importantes:
 
 ## 💻 Passo 4: Integrar o ID no Projeto
 
+**⚠️ IMPORTANTE:** Você **NÃO precisa** copiar e colar o código JavaScript no HTML! O componente `GoogleAnalytics.tsx` já está implementado e faz isso automaticamente. Você só precisa configurar a variável de ambiente.
+
 ### 4.1. Para Desenvolvimento Local
 
-1. Abra o arquivo `.env.local` na pasta `web/`
-   - Se não existir, crie um novo arquivo
+1. Abra ou crie o arquivo `.env.local` na pasta `web/`
 2. Adicione a seguinte linha:
 
 ```env
@@ -123,9 +124,16 @@ NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 
 **Substitua `G-XXXXXXXXXX` pelo seu ID real!**
 
-Exemplo:
+Exemplo (com seu ID atual):
 ```env
-NEXT_PUBLIC_GA_ID=G-ABC123XYZ
+NEXT_PUBLIC_GA_ID=G-Z10Y6M3MX4
+```
+
+**Exemplo completo do `.env.local`:**
+```env
+DATABASE_URL="sua_database_url"
+NEXT_PUBLIC_API_URL="http://localhost:3000"
+NEXT_PUBLIC_GA_ID=G-Z10Y6M3MX4
 ```
 
 3. Salve o arquivo
@@ -143,13 +151,16 @@ NEXT_PUBLIC_GA_ID=G-ABC123XYZ
 4. Clique em **"Add New"**
 5. Preencha:
    - **Name:** `NEXT_PUBLIC_GA_ID`
-   - **Value:** `G-XXXXXXXXXX` (seu ID real)
-   - **Environment:** Selecione "Production" (e "Preview" se quiser)
+   - **Value:** `G-Z10Y6M3MX4` (seu ID real)
+   - **Environment:** 
+     - ✅ Marque **"Production"**
+     - ✅ Marque **"Preview"** (opcional)
 6. Clique em **"Save"**
-7. **Importante:** Faça um novo deploy para aplicar a mudança:
+7. **⚠️ CRUCIAL:** Faça um **Redeploy** para aplicar:
    - Vá em **"Deployments"**
-   - Clique nos três pontos do último deploy
+   - Clique nos três pontos (⋯) do último deploy
    - Selecione **"Redeploy"**
+   - Aguarde o deploy terminar
 
 ---
 
