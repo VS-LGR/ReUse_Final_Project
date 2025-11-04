@@ -5,6 +5,7 @@ import OptimizedImage from '@/components/OptimizedImage';
 import BottomNavigation from '@/components/BottomNavigation';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { trackEvent } from '@/components/GoogleAnalytics';
 
 interface Product {
   id: string;
@@ -36,6 +37,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         if (response.ok) {
           const data = await response.json();
           setProduct(data);
+          
+          // Rastrear visualização de produto
+          trackEvent('view_product', {
+            product_id: data.id,
+            product_name: data.name,
+            category: data.category,
+          });
         } else {
           // Produto não encontrado, redirecionar
           router.push('/offers');

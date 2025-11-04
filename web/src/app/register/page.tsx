@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { trackEvent } from '@/components/GoogleAnalytics';
 
 export default function RegisterPage() {
   const [showPass, setShowPass] = useState(false);
@@ -103,6 +104,14 @@ export default function RegisterPage() {
       });
 
       if (response.ok) {
+        const userData = await response.json();
+        
+        // Rastrear evento de registro
+        trackEvent('sign_up', {
+          method: 'email',
+          user_id: userData.id,
+        });
+
         if (location) {
           localStorage.setItem('@user_location', JSON.stringify(location));
         }

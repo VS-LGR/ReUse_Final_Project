@@ -67,6 +67,22 @@ function GoogleAnalyticsInner() {
 }
 
 /**
+ * Função helper para rastrear eventos customizados
+ * @param eventName - Nome do evento (ex: 'login', 'create_offer')
+ * @param eventParams - Parâmetros adicionais do evento
+ */
+export function trackEvent(eventName: string, eventParams?: Record<string, any>) {
+  if (typeof window === 'undefined' || !window.gtag || !GA_ID) {
+    return
+  }
+
+  window.gtag('event', eventName, {
+    event_category: 'user_interaction',
+    ...eventParams,
+  })
+}
+
+/**
  * Componente Google Analytics
  * Carrega o script do GA4 e rastreia page views
  * Envolvido em Suspense para suportar useSearchParams

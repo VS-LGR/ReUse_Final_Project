@@ -38,18 +38,49 @@ export default function ProfilePage() {
     const loadData = async () => {
       // Load user data
       const userData = localStorage.getItem('@logged_in_user');
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-
-        // Load location data for the logged-in user
-        const locationData = localStorage.getItem('@user_location');
-        if (locationData) {
-          setLocation(JSON.parse(locationData));
-        }
-      } else {
+      if (!userData) {
         router.replace('/');
         return;
+      }
+
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+
+      // Buscar dados atualizados do usuário da API (incluindo XP/Level)
+      try {
+        const response = await fetch(`/api/users/${parsedUser.id}`);
+        if (response.ok) {
+          const userDataFromAPI = await response.json();
+          setUser(userDataFromAPI);
+          
+          // Sincronizar XP/Level do backend
+          if (userDataFromAPI.xp !== undefined) {
+            setXp(userDataFromAPI.xp);
+            localStorage.setItem(STORAGE_KEYS.xp, userDataFromAPI.xp.toString());
+          }
+          if (userDataFromAPI.level !== undefined) {
+            setLevel(userDataFromAPI.level);
+            localStorage.setItem(STORAGE_KEYS.level, userDataFromAPI.level.toString());
+          }
+
+          // Atualizar localStorage com dados atualizados
+          localStorage.setItem('@logged_in_user', JSON.stringify(userDataFromAPI));
+        }
+      } catch (apiError) {
+        console.error('Error fetching user from API:', apiError);
+        // Usar dados do localStorage como fallback
+        if (parsedUser.xp !== undefined) {
+          setXp(parsedUser.xp);
+        }
+        if (parsedUser.level !== undefined) {
+          setLevel(parsedUser.level);
+        }
+      }
+
+      // Load location data for the logged-in user
+      const locationData = localStorage.getItem('@user_location');
+      if (locationData) {
+        setLocation(JSON.parse(locationData));
       }
 
       // Load other user preferences
@@ -57,37 +88,84 @@ export default function ProfilePage() {
       const storedNotifications = localStorage.getItem(STORAGE_KEYS.notifications);
       const storedLanguage = localStorage.getItem(STORAGE_KEYS.language);
       const storedTheme = localStorage.getItem(STORAGE_KEYS.theme);
-      const storedXP = localStorage.getItem(STORAGE_KEYS.xp);
-      const storedLevel = localStorage.getItem(STORAGE_KEYS.level);
       const storedBadges = localStorage.getItem(STORAGE_KEYS.badges);
 
       if (storedImage) setImage(storedImage);
       if (storedNotifications !== null) setNotifications(JSON.parse(storedNotifications));
       if (storedLanguage) setLanguage(storedLanguage);
       if (storedTheme) setTheme(storedTheme);
-      if (storedXP) setXp(parseInt(storedXP));
-      if (storedLevel) setLevel(parseInt(storedLevel));
       if (storedBadges) setBadges(JSON.parse(storedBadges));
     };
 
     loadData();
-    addXP(10); // +10 XP por visitar o perfil
+    
+    // +10 XP por visitar o perfil (após carregar)
+    setTimeout(() => {
+      addXP(10);
+    }, 500);
   }, [router]);
 
   const addXP = async (amount: number) => {
-    let newXP = xp + amount;
-    let newLevel = level;
-
-    while (newXP >= XP_PER_LEVEL) {
-      newXP -= XP_PER_LEVEL;
-      newLevel += 1;
-      alert(`🎉 Subiu de nível! Você agora é nível ${newLevel}!`);
+    if (!user || !user.id) {
+      console.warn('Cannot add XP: user not loaded');
+      return;
     }
 
-    setXp(newXP);
-    setLevel(newLevel);
-    localStorage.setItem(STORAGE_KEYS.xp, newXP.toString());
-    localStorage.setItem(STORAGE_KEYS.level, newLevel.toString());
+    try {
+      // Atualizar XP no backend
+      const response = await fetch(`/api/users/${user.id}/xp`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Atualizar estado local
+        setXp(result.xp);
+        setLevel(result.level);
+
+        // Salvar no localStorage como cache
+        localStorage.setItem(STORAGE_KEYS.xp, result.xp.toString());
+        localStorage.setItem(STORAGE_KEYS.level, result.level.toString());
+
+        // Atualizar dados do usuário no localStorage
+        const updatedUser = { ...user, xp: result.xp, level: result.level };
+        localStorage.setItem('@logged_in_user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+
+        // Mostrar alerta se subiu de nível
+        if (result.leveledUp && result.levelsGained > 0) {
+          if (result.levelsGained === 1) {
+            alert(`🎉 Subiu de nível! Você agora é nível ${result.level}!`);
+          } else {
+            alert(`🎉 Subiu de nível! Você subiu ${result.levelsGained} níveis! Agora é nível ${result.level}!`);
+          }
+        }
+      } else {
+        throw new Error('Failed to update XP');
+      }
+    } catch (error) {
+      console.error('Error updating XP:', error);
+      
+      // Fallback: atualizar localmente se a API falhar
+      let newXP = xp + amount;
+      let newLevel = level;
+
+      while (newXP >= XP_PER_LEVEL) {
+        newXP -= XP_PER_LEVEL;
+        newLevel += 1;
+        alert(`🎉 Subiu de nível! Você agora é nível ${newLevel}!`);
+      }
+
+      setXp(newXP);
+      setLevel(newLevel);
+      localStorage.setItem(STORAGE_KEYS.xp, newXP.toString());
+      localStorage.setItem(STORAGE_KEYS.level, newLevel.toString());
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import BottomNavigation from '@/components/BottomNavigation';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { trackEvent } from '@/components/GoogleAnalytics';
 
 export default function AddOfferPage() {
   const [offerName, setOfferName] = useState('');
@@ -108,6 +109,14 @@ export default function AddOfferPage() {
 
       if (response.ok) {
         const newOffer = await response.json();
+        
+        // Rastrear evento de criação de oferta
+        trackEvent('create_offer', {
+          offer_id: newOffer.id,
+          category: newOffer.category,
+          user_id: user.id,
+        });
+        
         alert('Oferta criada com sucesso!');
         router.push(`/product/${newOffer.id}`);
       } else {

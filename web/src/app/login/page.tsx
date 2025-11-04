@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { trackEvent } from '@/components/GoogleAnalytics';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -38,6 +39,12 @@ export default function LoginPage() {
         localStorage.setItem('@theme', userData.theme || 'Claro');
         localStorage.setItem('@language', userData.language || 'pt-BR');
         localStorage.setItem('@profile_image', userData.avatar || '/default-avatar.png');
+        
+        // Rastrear evento de login
+        trackEvent('login', {
+          method: 'email',
+          user_id: userData.id,
+        });
         
         alert('Login realizado com sucesso!');
         router.push('/profile');
