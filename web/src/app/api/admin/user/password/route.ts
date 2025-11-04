@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { hashPassword } from '@/lib/auth'
 
 /**
  * Trocar senha de usuário
@@ -24,13 +25,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Em produção, hash a senha antes de salvar
-    // const hashedPassword = await bcrypt.hash(newPassword, 10)
+    // Hash da senha
+    const hashedPassword = await hashPassword(newPassword)
     
     await prisma.user.update({
       where: { id: userId },
       data: {
-        password: newPassword, // Substituir por hashedPassword em produção
+        password: hashedPassword,
       },
     })
 

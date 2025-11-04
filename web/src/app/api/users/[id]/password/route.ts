@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { hashPassword } from '@/lib/auth'
 
 /**
  * Endpoint para trocar senha de usuário
@@ -28,13 +29,13 @@ export async function PATCH(
       )
     }
 
-    // TODO: Em produção, hash a senha antes de salvar
-    // const hashedPassword = await bcrypt.hash(password, 10)
+    // Hash da senha
+    const hashedPassword = await hashPassword(password)
 
     await prisma.user.update({
       where: { id },
       data: {
-        password, // Substituir por hashedPassword em produção
+        password: hashedPassword,
       },
     })
 

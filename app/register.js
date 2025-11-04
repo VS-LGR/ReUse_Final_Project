@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
+import { register } from '../lib/api';
 
 export default function RegisterScreen() {
   const [showPass, setShowPass] = useState(false);
@@ -109,41 +110,37 @@ export default function RegisterScreen() {
 
   const registerUser = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Preencha todos os campos!');
+      Alert.alert('Erro', 'Preencha todos os campos!');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('As senhas não coincidem!');
+      Alert.alert('Erro', 'As senhas não coincidem!');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres!');
       return;
     }
 
     if (!acceptedTerms) {
-      Alert.alert('Você precisa aceitar os termos!');
+      Alert.alert('Erro', 'Você precisa aceitar os termos!');
       return;
     }
 
     try {
-      const usersData = await AsyncStorage.getItem('@users');
-      const users = usersData ? JSON.parse(usersData) : [];
-
-      const alreadyExists = users.find((u) => u.email === email);
-      if (alreadyExists) {
-        Alert.alert('Este email já está registrado.');
-        return;
-      }
-
-      // Create user object with location data
-      const newUser = { 
-        name, 
-        email, 
+      // Registrar usuário na API
+      const userData = {
+        name,
+        email,
         password,
-        createdAt: new Date().toISOString()
+        avatar: '/default-avatar.png',
+        theme: 'Claro',
+        language: 'pt-BR'
       };
 
-      // Store user data
-      users.push(newUser);
-      await AsyncStorage.setItem('@users', JSON.stringify(users));
+      await register(userData);
 
       // Store location data separately for the user
       if (location) {
@@ -153,12 +150,13 @@ export default function RegisterScreen() {
       // Clear any existing login session
       await AsyncStorage.removeItem('@logged_in_user');
 
-      // Navigate to login
+      Alert.alert('Sucesso', 'Conta criada com sucesso! Faça login para continuar.');
       router.replace('/login');
       
     } catch (err) {
       console.error('Registration error:', err);
-      Alert.alert('Erro', 'Não foi possível criar sua conta. Tente novamente.');
+      const errorMessage = err.message || err.data?.error || 'Não foi possível criar sua conta. Tente novamente.';
+      Alert.alert('Erro', errorMessage);
     }
   };
 

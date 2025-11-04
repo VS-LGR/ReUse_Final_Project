@@ -8,46 +8,46 @@ import {
   Image,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { login, getLoggedInUser } from '../lib/api';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const checkLoggedIn = async () => {
-      const data = await AsyncStorage.getItem('@logged_in_user');
-      if (data) {
+      const user = await getLoggedInUser();
+      if (user) {
         router.replace('/profile');
       }
     };
     checkLoggedIn();
   }, []);
 
-  const login = async () => {
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Erro', 'Preencha email e senha!');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const usersData = await AsyncStorage.getItem('@users');
-      const users = usersData ? JSON.parse(usersData) : [];
-
-      const foundUser = users.find(
-        (u) => u.email === email && u.password === password
-      );
-
-      if (!foundUser) {
-        Alert.alert('Email ou senha inválidos!');
-        return;
-      }
-
-      await AsyncStorage.setItem('@logged_in_user', JSON.stringify(foundUser));
-      Alert.alert('Login realizado com sucesso!');
-      router.push('/profile');
+      const user = await login(email, password);
+      Alert.alert('Sucesso', 'Login realizado com sucesso!');
+      router.replace('/profile');
     } catch (err) {
-      console.error(err);
-      Alert.alert('Erro ao fazer login.');
+      console.error('Login error:', err);
+      const errorMessage = err.message || err.data?.error || 'Erro ao fazer login. Verifique sua conexão e tente novamente.';
+      Alert.alert('Erro', errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,8 +98,16 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         {/* Login Button */}
-        <TouchableOpacity style={styles.loginBtn} onPress={login}>
-          <Text style={styles.loginText}>Login</Text>
+        <TouchableOpacity 
+          style={[styles.loginBtn, loading && styles.loginBtnDisabled]} 
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.loginText}>Login</Text>
+          )}
         </TouchableOpacity>
 
         {/* Social login icons */}
@@ -188,6 +196,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 10,
     marginTop: 20,
+  },
+  loginBtnDisabled: {
+    opacity: 0.6,
   },
   loginText: {
     textAlign: 'center',

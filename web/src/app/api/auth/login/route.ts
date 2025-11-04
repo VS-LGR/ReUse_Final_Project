@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { comparePassword, isBcryptHash } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { email, password } = body
+
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
+    }
 
     const user = await prisma.user.findUnique({
       where: { email },
@@ -30,8 +35,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // In production, compare hashed passwords
-    if (user.password !== password) {
+    // Verificar senha - suporta hash bcrypt e texto plano (para migração)
+    let passwordValid = false
+    if (isBcryptHash(user.password)) {
+      // Senha está hasheada, comparar com bcrypt
+      passwordValid = await comparePassword(password, user.password)
+    } else {
+      // Senha antiga em texto plano (compatibilidade durante migração)
+      passwordValid = user.password === password
+    }
+
+    if (!passwordValid) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
     }
 

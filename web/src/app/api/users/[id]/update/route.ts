@@ -23,17 +23,28 @@ export async function PATCH(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Verificar se o email já está em uso por outro usuário
-    if (email && email !== existingUser.email) {
-      const emailExists = await prisma.user.findUnique({
-        where: { email },
-      })
-
-      if (emailExists) {
+    // Validar email se fornecido
+    if (email !== undefined) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
         return NextResponse.json(
-          { error: 'Email already in use' },
+          { error: 'Invalid email format' },
           { status: 400 }
         )
+      }
+
+      // Verificar se o email já está em uso por outro usuário
+      if (email !== existingUser.email) {
+        const emailExists = await prisma.user.findUnique({
+          where: { email },
+        })
+
+        if (emailExists) {
+          return NextResponse.json(
+            { error: 'Email already in use' },
+            { status: 400 }
+          )
+        }
       }
     }
 

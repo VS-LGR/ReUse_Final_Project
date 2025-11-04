@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { getUser, updateXP, getLoggedInUser } from '../lib/api';
 
 const STORAGE_KEYS = {
   image: '@profile_image',
@@ -45,55 +46,118 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     (async () => {
-      // Load user data
-      const userData = await AsyncStorage.getItem('@logged_in_user');
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+      try {
+        // Buscar usuário logado
+        const loggedInUser = await getLoggedInUser();
+        
+        if (!loggedInUser) {
+          router.replace('/login');
+          return;
+        }
+
+        setUser(loggedInUser);
+
+        // Buscar dados atualizados do usuário da API
+        try {
+          const userData = await getUser(loggedInUser.id);
+          setUser(userData);
+          
+          // Sincronizar XP/Level do backend
+          if (userData.xp !== undefined) {
+            setXp(userData.xp);
+          }
+          if (userData.level !== undefined) {
+            setLevel(userData.level);
+          }
+        } catch (apiError) {
+          console.error('Error fetching user from API:', apiError);
+          // Usar dados do AsyncStorage como fallback
+          if (loggedInUser.xp !== undefined) {
+            setXp(loggedInUser.xp);
+          }
+          if (loggedInUser.level !== undefined) {
+            setLevel(loggedInUser.level);
+          }
+        }
 
         // Load location data for the logged-in user
         const locationData = await AsyncStorage.getItem('@user_location');
         if (locationData) {
           setLocation(JSON.parse(locationData));
         }
+
+        // Load other user preferences
+        const storedImage = await AsyncStorage.getItem(STORAGE_KEYS.image);
+        const storedNotifications = await AsyncStorage.getItem(STORAGE_KEYS.notifications);
+        const storedLanguage = await AsyncStorage.getItem(STORAGE_KEYS.language);
+        const storedTheme = await AsyncStorage.getItem(STORAGE_KEYS.theme);
+        const storedBadges = await AsyncStorage.getItem(STORAGE_KEYS.badges);
+
+        if (storedImage) setImage(storedImage);
+        if (storedNotifications !== null) setNotifications(JSON.parse(storedNotifications));
+        if (storedLanguage) setLanguage(storedLanguage);
+        if (storedTheme) setTheme(storedTheme);
+        if (storedBadges) setBadges(JSON.parse(storedBadges));
+      } catch (error) {
+        console.error('Error loading profile:', error);
       }
-
-      // Load other user preferences
-      const storedImage = await AsyncStorage.getItem(STORAGE_KEYS.image);
-      const storedNotifications = await AsyncStorage.getItem(STORAGE_KEYS.notifications);
-      const storedLanguage = await AsyncStorage.getItem(STORAGE_KEYS.language);
-      const storedTheme = await AsyncStorage.getItem(STORAGE_KEYS.theme);
-      const storedXP = await AsyncStorage.getItem(STORAGE_KEYS.xp);
-      const storedLevel = await AsyncStorage.getItem(STORAGE_KEYS.level);
-      const storedBadges = await AsyncStorage.getItem(STORAGE_KEYS.badges);
-
-      if (storedImage) setImage(storedImage);
-      if (storedNotifications !== null) setNotifications(JSON.parse(storedNotifications));
-      if (storedLanguage) setLanguage(storedLanguage);
-      if (storedTheme) setTheme(storedTheme);
-      if (storedXP) setXp(parseInt(storedXP));
-      if (storedLevel) setLevel(parseInt(storedLevel));
-      if (storedBadges) setBadges(JSON.parse(storedBadges));
     })();
 
-    // +10 XP por visitar o perfil
-    addXP(10);
+    // +10 XP por visitar o perfil (após carregar)
+    setTimeout(() => {
+      addXP(10);
+    }, 500);
   }, []);
 
   const addXP = async (amount) => {
-    let newXP = xp + amount;
-    let newLevel = level;
-
-    while (newXP >= XP_PER_LEVEL) {
-      newXP -= XP_PER_LEVEL;
-      newLevel += 1;
-      Alert.alert("🎉 Subiu de nível!", `Você agora é nível ${newLevel}!`);
+    if (!user || !user.id) {
+      console.warn('Cannot add XP: user not loaded');
+      return;
     }
 
-    setXp(newXP);
-    setLevel(newLevel);
-    await AsyncStorage.setItem(STORAGE_KEYS.xp, newXP.toString());
-    await AsyncStorage.setItem(STORAGE_KEYS.level, newLevel.toString());
+    try {
+      // Atualizar XP no backend
+      const result = await updateXP(user.id, amount);
+      
+      // Atualizar estado local
+      setXp(result.xp);
+      setLevel(result.level);
+
+      // Salvar no AsyncStorage como cache
+      await AsyncStorage.setItem(STORAGE_KEYS.xp, result.xp.toString());
+      await AsyncStorage.setItem(STORAGE_KEYS.level, result.level.toString());
+
+      // Atualizar dados do usuário no AsyncStorage
+      const updatedUser = { ...user, xp: result.xp, level: result.level };
+      await AsyncStorage.setItem('@logged_in_user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      // Mostrar alerta se subiu de nível
+      if (result.leveledUp && result.levelsGained > 0) {
+        if (result.levelsGained === 1) {
+          Alert.alert("🎉 Subiu de nível!", `Você agora é nível ${result.level}!`);
+        } else {
+          Alert.alert("🎉 Subiu de nível!", `Você subiu ${result.levelsGained} níveis! Agora é nível ${result.level}!`);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating XP:', error);
+      
+      // Fallback: atualizar localmente se a API falhar
+      let newXP = xp + amount;
+      let newLevel = level;
+
+      while (newXP >= XP_PER_LEVEL) {
+        newXP -= XP_PER_LEVEL;
+        newLevel += 1;
+        Alert.alert("🎉 Subiu de nível!", `Você agora é nível ${newLevel}!`);
+      }
+
+      setXp(newXP);
+      setLevel(newLevel);
+      await AsyncStorage.setItem(STORAGE_KEYS.xp, newXP.toString());
+      await AsyncStorage.setItem(STORAGE_KEYS.level, newLevel.toString());
+    }
   };
 
   const takePhoto = async () => {
