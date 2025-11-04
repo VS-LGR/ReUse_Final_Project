@@ -213,7 +213,7 @@ async function main() {
       name: 'Skateboard Completo',
       description:
         'Skateboard completo com rodas, trucks e lixa. Ideal para iniciantes. Praticamente novo, usado apenas algumas vezes. Marca brasileira de qualidade.',
-      image: 'https://images.unsplash.com/photo-1564982752979-5e56d9942d8a?w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1571494146906-86de15d3817b?w=800&q=80',
       desiredItem: 'Patins, Bicicleta, Equipamentos esportivos',
       condition: 'Seminovo',
       price: 'R$ 150,00',
@@ -227,7 +227,7 @@ async function main() {
       name: 'Câmera Canon EOS',
       description:
         'Câmera fotográfica Canon EOS, modelo intermediário. Ideal para fotografia amadora. Inclui lente 18-55mm, bateria e carregador. Boa conservação.',
-      image: 'https://images.unsplash.com/photo-1516035069371-29a1b244b32a?w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=800&q=80',
       desiredItem: 'Lentes, Tripé, Mochila para câmera',
       condition: 'Usado',
       price: 'R$ 950,00',

@@ -13,6 +13,11 @@ model User {
   name        String
   password    String
   avatar      String?
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
   theme       String    @default("Claro")
   language    String    @default("pt-BR")
   xp          Int       @default(0)

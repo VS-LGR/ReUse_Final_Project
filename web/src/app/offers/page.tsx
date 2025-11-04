@@ -31,6 +31,15 @@ const categories = [
   { id: 'brinquedos', name: 'Brinquedos', icon: '🧸' },
   { id: 'papelaria', name: 'Papelaria', icon: '📝' },
   { id: 'sapatos', name: 'Sapatos', icon: '👟' },
+  { id: 'livros', name: 'Livros', icon: '📚' },
+  { id: 'esportes', name: 'Esportes', icon: '⚽' },
+  { id: 'musica', name: 'Música', icon: '🎵' },
+  { id: 'jogos', name: 'Jogos', icon: '🎮' },
+  { id: 'automoveis', name: 'Automóveis', icon: '🚗' },
+  { id: 'bicicletas', name: 'Bicicletas', icon: '🚲' },
+  { id: 'ferramentas', name: 'Ferramentas', icon: '🔧' },
+  { id: 'decoracao', name: 'Decoração', icon: '🖼️' },
+  { id: 'outros', name: 'Outros', icon: '📦' },
 ];
 
 const mockOffers: Offer[] = [
@@ -143,7 +152,7 @@ const mockOffers: Offer[] = [
 export default function OffersPage() {
   const [offers, setOffers] = useState<Offer[]>(mockOffers);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [location, setLocation] = useState('São Paulo - Brasil');
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -167,9 +176,13 @@ export default function OffersPage() {
     fetchOffers();
   }, []);
 
-  const filteredOffers = selectedCategory === 'all' 
-    ? offers 
-    : offers.filter(offer => offer.category === selectedCategory);
+  const filteredOffers = offers.filter(offer => {
+    const matchesCategory = selectedCategory === 'all' || offer.category === selectedCategory;
+    const matchesSearch = searchQuery === '' || 
+      offer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      offer.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const getConditionColor = (condition: string) => {
     switch (condition.toUpperCase()) {
@@ -182,67 +195,55 @@ export default function OffersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-          </div>
-          <select 
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm text-gray-900"
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Search Bar */}
+      <div className="bg-white px-4 py-3 border-b border-gray-200 sticky top-0 z-10">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Buscar produtos..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-gray-100 rounded-full px-4 py-3 pl-12 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+          <svg 
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
           >
-            <option value="all">Categorias</option>
-            {categories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex items-center gap-3">
-          <button>
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
-          <button>
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 102.828 2.828L10.828 12H4.828V7z" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Location Filter */}
-      <div className="bg-white px-4 py-3 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <span className="text-sm text-gray-900 font-medium">{location}</span>
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
-      </div>
-
-      {/* Instructions */}
-      <div className="bg-white px-4 py-4 border-b border-gray-200">
-        <p className="text-sm text-gray-800 font-medium">
-          Filtre por categoria e encontre o que precisa.
-        </p>
       </div>
 
       {/* Categories */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
-        <h2 className="text-sm font-semibold text-gray-900 mb-3">Categorias 15+</h2>
+        <h2 className="text-sm font-semibold text-gray-900 mb-3">Categorias</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`flex flex-col items-center gap-2 min-w-16 ${
+              selectedCategory === 'all' ? 'opacity-100' : 'opacity-60'
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+              selectedCategory === 'all' ? 'bg-green-100' : 'bg-gray-100'
+            }`}>
+              🏠
+            </div>
+            <span className="text-xs text-gray-900 font-medium text-center">Todos</span>
+          </button>
           {categories.map(category => (
             <button
               key={category.id}
@@ -264,38 +265,57 @@ export default function OffersPage() {
 
       {/* Offers Grid */}
       <div className="p-4">
-        <div className="grid grid-cols-2 gap-4">
-          {filteredOffers.map(offer => (
-            <Link
-              key={offer.id}
-              href={`/product/${offer.id}`}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
-            >
-              <div className="aspect-square relative bg-gray-100">
-                <OptimizedImage
-                  src={offer.image || '/logo-placeholder.svg'}
-                  alt={offer.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-3">
-                <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-2">
-                  {offer.name}
-                </h3>
-                <p className="text-lg font-bold text-green-600 mb-1">{offer.price}</p>
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-bold ${getConditionColor(offer.condition)}`}>
-                    {offer.condition}
-                  </span>
-                  <span className="text-xs text-gray-700 font-medium">
-                    {offer.rating}/10
-                  </span>
+        {filteredOffers.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-2">
+              {searchQuery ? 'Nenhum produto encontrado para sua busca.' : 'Nenhuma oferta disponível nesta categoria.'}
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setSelectedCategory('all')
+                }}
+                className="text-green-600 font-semibold hover:underline"
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            {filteredOffers.map(offer => (
+              <Link
+                key={offer.id}
+                href={`/product/${offer.id}`}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+              >
+                <div className="aspect-square relative bg-gray-100">
+                  <OptimizedImage
+                    src={offer.image || '/logo-placeholder.svg'}
+                    alt={offer.name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="p-3">
+                  <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-2">
+                    {offer.name}
+                  </h3>
+                  <p className="text-lg font-bold text-green-600 mb-1">{offer.price}</p>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xs font-bold ${getConditionColor(offer.condition)}`}>
+                      {offer.condition}
+                    </span>
+                    <span className="text-xs text-gray-700 font-medium">
+                      {offer.rating}/10
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Bottom Navigation */}
