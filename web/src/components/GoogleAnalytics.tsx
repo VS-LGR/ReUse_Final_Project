@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 declare global {
@@ -17,10 +17,10 @@ declare global {
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID
 
 /**
- * Componente Google Analytics
- * Carrega o script do GA4 e rastreia page views
+ * Componente interno que usa useSearchParams
+ * Precisa estar dentro de Suspense boundary
  */
-export default function GoogleAnalytics() {
+function GoogleAnalyticsInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -64,5 +64,23 @@ export default function GoogleAnalytics() {
 
   // Não renderizar nada
   return null
+}
+
+/**
+ * Componente Google Analytics
+ * Carrega o script do GA4 e rastreia page views
+ * Envolvido em Suspense para suportar useSearchParams
+ */
+export default function GoogleAnalytics() {
+  // Se não tiver GA_ID, não renderizar nada
+  if (!GA_ID) {
+    return null
+  }
+
+  return (
+    <Suspense fallback={null}>
+      <GoogleAnalyticsInner />
+    </Suspense>
+  )
 }
 
