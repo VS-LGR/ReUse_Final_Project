@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -171,9 +171,10 @@ export default function OffersPage() {
     : offers.filter(offer => offer.category === selectedCategory);
 
   const getConditionColor = (condition: string) => {
-    switch (condition) {
+    switch (condition.toUpperCase()) {
       case 'NOVO': return 'text-green-600';
-      case 'SEMI NOVA': return 'text-blue-600';
+      case 'SEMI NOVA':
+      case 'SEMINOVO': return 'text-blue-600';
       case 'USADO': return 'text-orange-600';
       default: return 'text-gray-600';
     }
@@ -269,9 +270,9 @@ export default function OffersPage() {
               href={`/product/${offer.id}`}
               className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
             >
-              <div className="aspect-square relative">
-                <Image
-                  src={offer.image}
+              <div className="aspect-square relative bg-gray-100">
+                <OptimizedImage
+                  src={offer.image || '/logo-placeholder.svg'}
                   alt={offer.name}
                   fill
                   className="object-cover"

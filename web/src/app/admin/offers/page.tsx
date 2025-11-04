@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import OptimizedImage from '@/components/OptimizedImage'
 import AdminLayout from '../components/AdminLayout'
 import { config } from '@/lib/config'
 
@@ -159,7 +159,7 @@ export default function OffersPage() {
                 >
                   <div className="w-20 h-20 rounded-lg bg-gray-100 mr-5 flex items-center justify-center overflow-hidden">
                     {offer.image ? (
-                      <Image
+                      <OptimizedImage
                         src={offer.image}
                         alt={getOfferTitle(offer)}
                         width={80}
@@ -291,7 +291,7 @@ export default function OffersPage() {
               <h2 className="text-2xl font-semibold mb-4">{getOfferTitle(selectedOffer)}</h2>
               {selectedOffer.image && (
                 <div className="mb-4">
-                  <Image
+                  <OptimizedImage
                     src={selectedOffer.image}
                     alt={getOfferTitle(selectedOffer)}
                     width={400}

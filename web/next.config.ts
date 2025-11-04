@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Desabilitar otimização para URLs externas para evitar erros 400
+    unoptimized: false,
     remotePatterns: [
       {
         protocol: 'https',
@@ -27,7 +29,16 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
+    // Configurações adicionais para melhorar compatibilidade
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
   },
   // Relax checks during Vercel build; we will fix types/lint later
   eslint: {

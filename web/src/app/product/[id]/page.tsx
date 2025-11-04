@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -90,7 +90,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
       {/* Product Image */}
       <div className="bg-white">
-        <Image
+        <OptimizedImage
           src={product.image || '/logo-placeholder.svg'}
           alt={product.name}
           width={400}
