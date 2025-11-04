@@ -201,7 +201,10 @@ export default function ProfileScreen() {
     addXP(5); // muda tema = +XP
   };  
 
-  const xpProgress = (xp / XP_PER_LEVEL) * 100;
+  // Calcular XP do nível atual (não o total acumulado)
+  // Se tem 250 XP e está no nível 3: 250 - (3-1)*100 = 250 - 200 = 50 XP no nível atual
+  const currentLevelXP = xp - ((level - 1) * XP_PER_LEVEL);
+  const xpProgress = (currentLevelXP / XP_PER_LEVEL) * 100;
 
   const getMapUrl = (lat, lon) => {
     return `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=15&addressdetails=1`;
@@ -269,9 +272,9 @@ export default function ProfileScreen() {
             {/* Gamificação: XP e Level */}
             <Text style={styles.levelText}>Nível {level}</Text>
             <View style={styles.xpBarContainer}>
-              <View style={[styles.xpBar, { width: `${xpProgress}%` }]} />
+              <View style={[styles.xpBar, { width: `${Math.min(xpProgress, 100)}%` }]} />
             </View>
-            <Text style={styles.xpLabel}>{xp}/{XP_PER_LEVEL} XP</Text>
+            <Text style={styles.xpLabel}>{currentLevelXP}/{XP_PER_LEVEL} XP</Text>
 
             {/* Editar Perfil */}
             <TouchableOpacity style={styles.editButton}>

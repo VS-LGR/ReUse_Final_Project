@@ -202,7 +202,10 @@ export default function ProfilePage() {
     addXP(5); // muda tema = +XP
   };
 
-  const xpProgress = (xp / XP_PER_LEVEL) * 100;
+  // Calcular XP do nível atual (não o total acumulado)
+  // Se tem 250 XP e está no nível 3: 250 - (3-1)*100 = 250 - 200 = 50 XP no nível atual
+  const currentLevelXP = xp - ((level - 1) * XP_PER_LEVEL);
+  const xpProgress = (currentLevelXP / XP_PER_LEVEL) * 100;
 
   const openInMaps = () => {
     if (location) {
@@ -274,11 +277,11 @@ export default function ProfilePage() {
         <div className="w-48 h-2 bg-gray-300 rounded-full mx-auto mt-2">
           <div 
             className="h-full bg-green-500 rounded-full transition-all duration-300"
-            style={{ width: `${xpProgress}%` }}
+            style={{ width: `${Math.min(xpProgress, 100)}%` }}
           />
         </div>
         <p className={`text-sm mt-1 ${theme === 'Claro' ? 'text-gray-800' : 'text-gray-300'}`}>
-          {xp}/{XP_PER_LEVEL} XP
+          {currentLevelXP}/{XP_PER_LEVEL} XP
         </p>
 
         <button className="bg-green-500 text-white px-3 py-1 rounded-lg flex items-center mx-auto mt-2">
